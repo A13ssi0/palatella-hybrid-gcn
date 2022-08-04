@@ -1,0 +1,1 @@
+arglist = {'outdir'	'amicaout'	'num_chans'	35	'pcakeep'	33	'max_threads'	2	'pdftype'	2	'numprocs'	1};
