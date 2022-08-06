@@ -1,6 +1,9 @@
 close all; clearvars; clc;
 
-load subj1_1trial.mat
+load subj7_pruned.mat
+savingPath = '';
+
+%%
 h_EMG = hilbert(subj.emg.data);
 h_EMG = abs(h_EMG);
 
@@ -22,23 +25,22 @@ settings.secPreMovement = 0;
 
 %% Calculating PSD and windowing the events
 disp('Calculating PSD')
-Sxx = compute_psd(data, settings.windowLength, settings.windowShift, settings.eeg.fs, settings.choosenFreq);
-subj.psd.data = Sxx;
+PSD.data = compute_psd(data, settings.windowLength, settings.windowShift, settings.eeg.fs, settings.choosenFreq);
 
 nFreq = settings.windowSize/2+1;
 freq = linspace(0, settings.eeg.fs/2, nFreq);
 freq = freq(2:end);
 idxFreq = settings.choosenFreq(1)<=freq & freq<=settings.choosenFreq(2);
 freq = freq(idxFreq);
-subj.psd.frequency = freq;
+PSD.frequency = freq;
 
 disp('Windowing the events')
 direction = 'backward';
 windowsTime = proc_pos2win(triggers.time, settings.windowStep, direction, settings.windowSize);
-subj.psd.triggers.time = windowsTime;
-subj.psd.triggers.num = subj.triggers.num;
+PSD.triggers.time = windowsTime;
+PSD.triggers.num = subj.triggers.num;
 
-subj.settings = settings;
+PSD.settings = settings;
 
 
 %% Labels the windows for train
@@ -71,11 +73,12 @@ for i = 1:length(windowsTime)-1
     end
 end
 
-subj.psd.windowsLabel = windows;
-subj.psd.trials = trials;
-subj.psd.triggers.time(1:2:end) = subj.psd.triggers.time(1:2:end) - nWindowPreMov;
-subj.psd.triggers.time(2:2:end) = subj.psd.triggers.time(1:2:end) + nWindowPostMov + nWindowPreMov;
+PSD.windowsLabel = windows;
+PSD.trials = trials;
+PSD.triggers.time(1:2:end) = PSD.triggers.time(1:2:end) - nWindowPreMov;
+PSD.triggers.time(2:2:end) = PSD.triggers.time(1:2:end) + nWindowPostMov + nWindowPreMov;
 
 
 %% SAVING
-save subj1_1trial.mat subj -v7.3
+%save(sprintf(savingName, subj,'-v7.3'));
+save subj7_psd PSD -v7.3

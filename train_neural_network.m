@@ -1,8 +1,11 @@
 close all; clearvars; clc;
 
 
+subject = 7;
+
+%%
 disp('importing the data')
-filename = 'subj1_1trial.mat';
+filename = ['subj',num2str(subject),'_psd.mat'];
 [Psd,settings] = startingTrain(filename);
 
 

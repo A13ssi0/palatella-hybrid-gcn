@@ -1,4 +1,4 @@
-function [Psd,settings] = startingTrain(filename,classes,takeRest)
+function [PSD,settings] = startingTrain(filename,classes,takeRest)
 
 if ~exist('takeRest','var')
     takeRest = false;
@@ -11,10 +11,9 @@ end
 
 load(filename)
 
-settings = subj.settings;
-Psd = subj.psd;
+settings = PSD.settings;
 
-Psd.data = log(Psd.data);
+PSD.data = log(PSD.data);
 
 %% Settings
 settings.trainChoosenFreq = 4:30;
@@ -24,13 +23,13 @@ settings.fractVal = 0.20;
 settings.fractTest = 1 - settings.fractTrain - settings.fractVal;
 
 %%
-[settings.trainChoosenFreq,~,settings.idxFrequencyChoosen] = intersect(settings.trainChoosenFreq, Psd.frequency);
-windowsLabel = Psd.windowsLabel;
+[settings.trainChoosenFreq,~,settings.idxFrequencyChoosen] = intersect(settings.trainChoosenFreq, PSD.frequency);
+windowsLabel = PSD.windowsLabel;
 
 settings.NumFeatures = length(settings.trainChoosenFreq);
-settings.NumChannels = size(Psd.data,3);
+settings.NumChannels = size(PSD.data,3);
 settings.inputSize = [settings.NumChannels, settings.NumFeatures, 1];
-windowsNum = Psd.triggers.num;
+windowsNum = PSD.triggers.num;
 
 if doMacroDividing
     windowsLabel(windowsLabel>=1 & windowsLabel<=2) = 1;
@@ -47,5 +46,5 @@ end
 if takeRest, settings.classes = [0 settings.classes]; end
 
 settings.numClasses = length(settings.classes);
-Psd.triggers.num = windowsNum;
-Psd.windowsLabel = windowsLabel;
+PSD.triggers.num = windowsNum;
+PSD.windowsLabel = windowsLabel;
