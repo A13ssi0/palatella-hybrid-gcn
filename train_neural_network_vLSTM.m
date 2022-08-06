@@ -123,6 +123,7 @@ layers = [
     graphConvWithLearnStruct3Layer(settings.NumFeatures,settings.NumOutFeatures,settings.NumEMG,settings.NumEEG,'Name','GConv')
     reluLayer('Name','relu')
     batchNormalizationLayer
+    dropoutLayer(0.1,'Name','drop')
     sequenceUnfoldingLayer('Name','unfold')
     flattenLayer('Name','flatten')
     gruLayer(settings.NumHiddenUnits,'OutputMode','last','Name','gru')
@@ -133,7 +134,7 @@ layers = [
 lgraph = layerGraph(layers);
 lgraph = connectLayers(lgraph,'fold/miniBatchSize','unfold/miniBatchSize');
 
-miniBatchSize  = 512; %512
+miniBatchSize = 512; %512
 validationFrequency = 2*floor(numel(outputTrain)/miniBatchSize);
 options = trainingOptions('adam', ...
     'MiniBatchSize',miniBatchSize, ...
@@ -154,11 +155,6 @@ disp('model training')
 net = trainNetwork(inputTrain, outputTrain, lgraph, options);
 
 %% Prediction and confusion matrix
-%YPred = predict(net,inputVal);
-YLabs = classify(net,inputTest);
-accuracy = sum(YLabs == outputTest)/numel(outputTest);
+[confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings);
 
-C = confusionmat(outputTest,YLabs);
-cm = confusionchart(C,'ColumnSummary','absolute','RowSummary','absolute','Normalization','row-normalized');
-disp(['Accuracy of: ', num2str(accuracy)])
-%save confMatrix14 cm
+accuracy = thresholdAccuracy(pred.cumul, outputTest, settings, [], true);

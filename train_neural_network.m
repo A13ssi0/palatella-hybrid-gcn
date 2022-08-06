@@ -5,8 +5,9 @@ subject = 7;
 
 %%
 disp('importing the data')
-filename = ['subj',num2str(subject),'_psd.mat'];
-[Psd,settings] = startingTrain(filename);
+%filename = ['subj',num2str(subject),'_psd.mat'];
+filename = 'subj1_1trial_psd.mat';
+[Psd,settings] = startingTrain(filename,1:11);
 
 
 %% Creating and extracting windows
@@ -116,14 +117,10 @@ disp('model training')
 net = trainNetwork(inputTrain, outputTrain, layers, options);
 
 %% Prediction and confusion matrix
-YPred = predict(net,inputTest);
-%YLabs = classify(net,inputTest);
-accuracy = sum(YLabs == outputTest)/numel(outputTest);
+[confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings);
 
-C = confusionmat(outputTest,YLabs);
-cm = confusionchart(C,'ColumnSummary','absolute','RowSummary','absolute','Normalization','row-normalized');
-disp(['Accuracy of: ', num2str(accuracy)])
-%save confMatrix14 cm
+accuracy = thresholdAccuracy(pred.cumul, outputTest, settings, [], true);
+
 
 %% Plot of the features
 Wa = double(net.Layers(2).Wa);
