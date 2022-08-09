@@ -2,7 +2,7 @@ close all; clearvars; clc;
 
 
 disp('importing the data')
-filename = 'subj1_1trial.mat';
+filename = 'subj1_1trial_psd.mat';
 [Psd,settings] = startingTrain(filename,1:11);
 
 

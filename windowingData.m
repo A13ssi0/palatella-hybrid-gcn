@@ -47,8 +47,6 @@ PSD.settings = settings;
 disp('Labeling the windows')
 
 t_max = size(data,2)/settings.eeg.fs;
-labels = triggers.nameClasses;
-num_labels = 1:length(labels);
 
 nWindowCue = settings.secCue/settings.windowShift;
 nWindowPostMov = settings.secPostMovement/settings.windowShift;
@@ -61,13 +59,11 @@ t = 0;
 
 for i = 1:length(windowsTime)-1
     wPOS = windowsTime(i);
-    wlabel = triggers.type(i);
+    wlabel = triggers.num(i);
 
-    idx_label = find(contains(labels,wlabel));
-
-    if( ~isempty(idx_label) )
+    if( wlabel>0 )
         t = t+1;
-        windows(wPOS-nWindowPreMov : wPOS+nWindowPostMov-1) = num_labels(idx_label);
+        windows(wPOS-nWindowPreMov : wPOS+nWindowPostMov-1) = wlabel;
         windows(wPOS-nWindowCue-nWindowPreMov : wPOS-1-nWindowPreMov) = 0;
         trials(wPOS-nWindowCue-nWindowPreMov : wPOS+nWindowPostMov-1) = t;
     end

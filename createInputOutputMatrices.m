@@ -8,14 +8,17 @@ input = cell(length(indicesToTake)*nWindowsTrial,1);
 output = nan(size(input));
 for i = 1:length(indicesToTake)
     if onsetNum(indicesToTake(i),1) ~= 0
-        idx = onsetNum(indicesToTake(i),2):onsetNum(indicesToTake(i)+1,2)-1;
+        idxSequencie = onsetNum(indicesToTake(i),2):onsetNum(indicesToTake(i)+1,2)-1;
     else        
-        idx = (-nWindowsTrial:-1) + onsetNum(indicesToTake(i)-1,2);
+        idxSequencie = (-nWindowsTrial:-1) + onsetNum(indicesToTake(i)-1,2);
     end
-    for j = idx
-        start = (i-1)*nMonwinShift+1; stop = start + nMonwinSize - 1;
-        input{i} = data(:,:,:,start:stop);
+    countTrial = 0;
+    for j = idxSequencie
+        countTrial = countTrial+1;
+        start = (idxSequencie-1)*nMonwinShift+1; stop = start + nMonwinSize - 1;
+        seq_I{countTrial} = data(:,:,:,start:stop);
     end
+    input((1:nWindowsTrial)+(i-1)*nWindowsTrial) = seq_I;
     output((1:nWindowsTrial)+(i-1)*nWindowsTrial) = onsetNum(indicesToTake(i),1);
 end
 output = categorical(output);
