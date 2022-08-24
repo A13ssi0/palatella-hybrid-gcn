@@ -4,7 +4,7 @@ rng(12)
 subject = 7;
 gridHiddenUnits = 5:5:50;
 gridDropOut = 0:0.1:0.9;
-savingPath='';
+savingPath='/home/palatella/workspace/palatella_net/';
 
 
 %%
@@ -48,8 +48,8 @@ for i = 1:n_sequences
     end
     %disp(int2str(i))
 end
-clear allSxx
-clearvars -except seq_I seq_O settings onsetNum gridDropOut gridHiddenUnits savingPath
+%clear allSxx
+clearvars -except seq_I seq_O settings onsetNum gridDropOut gridHiddenUnits savingPath allSxx
 %% Creating and extracting windows
 disp('creating new windows label')
 
@@ -85,7 +85,7 @@ inputTrain = cell(length(idxTrain)*nWindowsTrial,1);
 outputTrain = nan(size(inputTrain));
 for i = 1:length(idxTrain)
     if onsetNum(idxTrain(i),1) ~= 0
-        inputTrain((1:nWindowsTrial)+(i-1)*nWindowsTrial) = seq_I(onsetNum(idxTrain(i),2):onsetNum(idxTrain(i)+1,2)-1);
+        inputTrain((1:nWindowsTrial)+(i-1)*nWindowsTrial) = seq_I(onsetNum(idxTrain(i),2):(onsetNum(idxTrain(i)+1,2)-1));
     else        
         inputTrain((1:nWindowsTrial)+(i-1)*nWindowsTrial) = seq_I((-nWindowsTrial:-1) + onsetNum(idxTrain(i)-1,2));
     end

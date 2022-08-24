@@ -2,9 +2,9 @@ close all; clearvars; clc;
 rng(12)
 
 subject = 7;
-gridHiddenUnits = 5:5:50;
-gridDropOut = 0:0.1:0.9;
-savingPath='';
+gridHiddenUnits = 25:10:55;
+gridDropOut = 0:0.3:0.9;
+savingPath='/home/palatella/workspace/palatella_net/';
 
 
 %%
@@ -44,7 +44,7 @@ for i = 1:n_sequences
         onsetNum = [onsetNum; 0 i];
     end
 end
-clearvars -except settings onsetNum gridDropOut gridHiddenUnits savingPath nMonwinSize nMonwinShift
+clearvars -except allSxx settings onsetNum grid* savingPath subject
 %% Creating and extracting windows
 disp('creating new windows label')
 
@@ -73,9 +73,10 @@ disp('creating the input matrix')
 [inputVal, outputVal] = createInputOutputMatrices(allSxx, idxVal, onsetNum, settings);
 [inputTest, outputTest] = createInputOutputMatrices(allSxx, idxTest, onsetNum, settings);
 
+clearvars -except input* output* settings gridDropOut gridHiddenUnits savingPath subject
 
 %% Testing neural network
-bestAccuracy = 0;
+bestAccuracy.accuracy = 0;
 
 disp('model training')
 for x = gridHiddenUnits 
@@ -89,15 +90,15 @@ for x = gridHiddenUnits
 
             [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeuralNetwork(settings, outputTrain, inputVal, outputVal, inputTrain, inputTest, outputTest);
 
-            if class.accuracy>bestAccuracy
-                bestAccuracy = class.accuracy;
+            if class.accuracy>bestAccuracy.accuracy
+                bestAccuracy.accuracy = class.accuracy;
                 bestAccuracy.hiddenUnits = x;
                 bestAccuracy.gcnDrop = y;
                 bestAccuracy.gruDrop = z;
             end
 
             savingName = [savingPath,'subj',num2str(subject),'_net_','hdn',num2str(x),'_drop',num2str(y),'_',num2str(z)];
-            save(sprintf(savingName,net,info,confMatrix,class,pred,accuracyThresholds,settings,'-v7.3'));
+            save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
         end
     end
 end
