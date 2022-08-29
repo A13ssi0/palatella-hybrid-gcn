@@ -41,14 +41,38 @@ valueAcc = [gridHiddenUnits' valueAcc];
 % valueAcc = (idxAccCum-1)*0.3;
 
 %%
-x = 150;
-[row,col] = find(valueAcc(:,1)==x);
-y = valueAcc(row,2);
-z = valueAcc(row,3);
+clearvars; close all; clc;
+% x = 150;
+% [row,col] = find(valueAcc(:,1)==x);
+% y = valueAcc(row,2);
+% z = valueAcc(row,3);
+% 
+% savingName = [savingPath,'subj',num2str(subject),'_net_','hdn',num2str(x),'_drop',num2str(y),'_',num2str(z)];
+load('subj7_net_hdn45_drop0.3_0','-mat');
+% info = net.info;
 
-savingName = [savingPath,'subj',num2str(subject),'_net_','hdn',num2str(x),'_drop',num2str(y),'_',num2str(z)];
-net = load(savingName,'-mat');
-info = net.info;
+idx = ~isnan(info.ValidationAccuracy);
+figure()
+plot(info.ValidationAccuracy(idx),'b'), hold on
+plot(info.TrainingAccuracy(idx),'--'),
+ylim([0 100])
+xlim([1 sum(idx)])
+title('Accuracy')
+
+idx = ~isnan(info.ValidationLoss);
+figure()
+plot(info.ValidationLoss(idx),'b'), hold on
+plot(info.TrainingLoss(idx),'--'),
+title('Loss')
+xlim([1 sum(idx)])
+
+figure
+plot(accuracyThresholds)
+ylim([0 1])
+title('Cumulated accuracy')
+
+figure()
+confusionchart(confMatrix,'ColumnSummary','absolute','RowSummary','absolute','Normalization','row-normalized');
 
 
 
