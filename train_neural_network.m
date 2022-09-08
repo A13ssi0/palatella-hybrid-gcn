@@ -21,9 +21,6 @@ idxTrain = [];
 idxVal = [];
 idxTest = [];
 
-% calculating how many trial for class balance
-numTrials = min(histcounts(num));
-
 % dividind in train, validation and test set
 for i = settings.classes
     idxLabel = find(num == i);
