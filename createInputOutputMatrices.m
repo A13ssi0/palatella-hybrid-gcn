@@ -26,5 +26,15 @@ for i = 1:length(indicesToTake)
     input((1:nWindowsTrial)+(i-1)*nWindowsTrial) = seq_I;
     output((1:nWindowsTrial)+(i-1)*nWindowsTrial) = onsetNum(indicesToTake(i),1);
 end
+countClasses = histcounts(output);
+
+while max(countClasses)>3*min(countClasses)
+    [numClass,typeClass] = max(countClasses);
+    idxToDelete = datasample(find(output==typeClass-1),numClass-3*min(countClasses),'Replace',false);
+    input(idxToDelete) = [];
+    output(idxToDelete) = [];
+    countClasses = histcounts(output);
+end
 
 output = categorical(output);
+

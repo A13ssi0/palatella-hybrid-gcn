@@ -1,6 +1,6 @@
 close all; clearvars; clc;
 
-load subj7_pruned.mat
+load subj11_pruned.mat
 savingPath = '';
 
 %%
@@ -77,4 +77,4 @@ PSD.triggers.time(2:2:end) = PSD.triggers.time(1:2:end) + nWindowPostMov + nWind
 
 %% SAVING
 %save(sprintf(savingName, subj,'-v7.3'));
-save subj7_psd PSD -v7.3
+save subj11_psd PSD -v7.3

@@ -3,7 +3,7 @@ function [PSD,settings] = startingTrain(filename,classes,takeRest)
 if ~exist('takeRest','var')
     takeRest = false;
 end
-if ~exist('classes','var')
+if ~exist('classes','var') || isempty(classes)
     doMacroDividing = true;
 else
     doMacroDividing = false;
@@ -44,6 +44,18 @@ else
 end
 
 if takeRest, settings.classes = [0 settings.classes]; end
+
+
+% idxZeros = find(windowsLabel==0);
+% idxStartZeroTrial = [idxZeros(1); idxZeros(find(diff(idxZeros)>1)+1)];
+% 
+% secNothing = 0.5;
+% secZeros = 2;
+% idxEndNewZero = idxStartZeroTrial-secNothing/settings.windowShift;
+% 
+% windowsLabel(idxZeros) = nan;
+% windowsLabel([-secZeros/settings.windowShift:0]+idxEndNewZero) = 0;
+
 
 settings.numClasses = length(settings.classes);
 PSD.triggers.num = windowsNum;

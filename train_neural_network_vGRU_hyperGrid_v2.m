@@ -2,15 +2,24 @@ close all; clearvars; clc;
 rng(12)
 
 subject = 7;
-gridHiddenUnits = 25:10:55;
-gridDropOut = 0:0.3:0.9;
+gridHiddenUnits = 50:50:250;
+gridNumOutFeatures = [7, 14:14:50];
+gridDropOut = [0 0.1 0.3];
+% 
+% gridHiddenUnits = 100;
+% gridNumOutFeatures = 7;
+% gruDrop = 0.1;
+% gcnDrop = 0.3;
+
+% CAMBIARE PLOTS TRAINING E I FOR DELLE GRID
+
 savingPath='/home/palatella/workspace/palatella_net/';
 
 
 %%
 disp('importing the data')
 filename = ['subj',num2str(subject),'_psd.mat'];
-[Psd,settings] = startingTrain(filename,1:11);
+[Psd,settings] = startingTrain(filename);
 
 
 %% Creating and extracting windows
@@ -73,34 +82,45 @@ disp('creating the input matrix')
 [inputVal, outputVal] = createInputOutputMatrices(allSxx, idxVal, onsetNum, settings);
 [inputTest, outputTest] = createInputOutputMatrices(allSxx, idxTest, onsetNum, settings);
 
-clearvars -except input* output* settings gridDropOut gridHiddenUnits savingPath subject
+
+clearvars -except input* output* settings grid* savingPath subject
 
 %% Testing neural network
 bestAccuracy.accuracy = 0;
 
 disp('model training')
-for x = gridHiddenUnits 
-    for y = gridDropOut % of graph
+for q = gridHiddenUnits
+for x = gridNumOutFeatures 
+    for y =  gridDropOut % of graph
         for z = gridDropOut % of gru
-            disp(['HiddenUnits: ',num2str(x),'   GcnDropOut: ',num2str(y),'   GruDropOut: ',num2str(z)])
+            disp(['hiddenUnits: ',num2str(q),'   OutFeatures: ',num2str(x),'   GcnDropOut: ',num2str(y),'   GruDropOut: ',num2str(z)])
 
-            settings.NumHiddenUnits = x;
+            settings.NumHiddenUnits = q;
+            settings.NumOutFeatures = x;
             settings.gcnDropOut = y;
             settings.gruDropOut = z;
 
+%             firstCondition = q==50 && x>28;
+%             secondCondition = q==50 && x==28 && y>0;
+%             thirdCondition = q>50;
+% 
+%             if firstCondition || secondCondition || thirdCondition
             [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeuralNetwork(settings, outputTrain, inputVal, outputVal, inputTrain, inputTest, outputTest);
 
             if class.accuracy>bestAccuracy.accuracy
                 bestAccuracy.accuracy = class.accuracy;
-                bestAccuracy.hiddenUnits = x;
+                bestAccuracy.hiddenUnits = q;
+                bestAccuracy.outFeatures = x;
                 bestAccuracy.gcnDrop = y;
                 bestAccuracy.gruDrop = z;
             end
 
-            savingName = [savingPath,'subj',num2str(subject),'_net_','hdn',num2str(x),'_drop',num2str(y),'_',num2str(z)];
+            savingName = [savingPath,'subj',num2str(subject),'_net_','hidF',num2str(q),'_outF',num2str(x),'_drop',num2str(y),'_',num2str(z),'_macro'];
             save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
-        end
+%             end
+            end
     end
+end
 end
 
 save bestCaseScenario bestAccuracy
@@ -124,21 +144,21 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeura
     lgraph = layerGraph(layers);
     lgraph = connectLayers(lgraph,'fold/miniBatchSize','unfold/miniBatchSize');
     
-    miniBatchSize = 1024; %512
+    miniBatchSize = 1024*2; %512
     validationFrequency = 2*floor(numel(outputTrain)/miniBatchSize);
     options = trainingOptions('adam', ...
         'MiniBatchSize',miniBatchSize, ...
-        'MaxEpochs',60, ...
-        'InitialLearnRate',1e-2, ...
+        'MaxEpochs',20, ...
+        'InitialLearnRate',1e-3, ...
         'LearnRateSchedule','piecewise', ...
         'LearnRateDropFactor',1e-1, ...
-        'LearnRateDropPeriod',20, ...
+        'LearnRateDropPeriod',8, ...
         'ValidationData',{inputVal,outputVal}, ...
         'Shuffle', 'once', ...
         'ValidationFrequency',validationFrequency, ...
         'Verbose',false, ...
-        'ExecutionEnvironment','gpu');
-        %'Plots','training-progress', ...
+        'ExecutionEnvironment','gpu');%,...
+        %'Plots','training-progress');
     
     % Training
     [net, info] = trainNetwork(inputTrain, outputTrain, lgraph, options);

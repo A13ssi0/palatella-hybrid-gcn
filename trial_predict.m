@@ -11,12 +11,12 @@ trialClasses = reshape(outputTestSet,nWindowsTrial,nTrial)';
 if  ~isempty(find(trialClasses ~= trialClasses(:,1),1,'first'))
     error('Division in trials not possible. Classes not the same in the trial')
 end
-trialClasses = double(trialClasses(:,1));
+trialClasses = trialClasses(:,1);
 
 prediction.perc = nan(nTrial,nWindowsTrial,settings.numClasses);
 prediction.cumul = nan(nTrial,nWindowsTrial,settings.numClasses);
 
-classification.classes = nan(nTrial,nWindowsTrial);
+classification.classes = categorical(nan(nTrial,nWindowsTrial));
 isCorrectClass = nan(nTrial,nWindowsTrial);
 
 for i = 1:nTrial
@@ -40,7 +40,7 @@ end
 classification.accuracy = sum(isCorrectClass,'all')/numel(outputTestSet);
 disp(['Classification accuracy of: ', num2str(classification.accuracy)])
 
-confMatrix = confusionmat(outputTestSet,categorical(reshape(classification.classes', size(outputTestSet))));
+confMatrix = confusionmat(outputTestSet,reshape(classification.classes', size(outputTestSet)));
 
 %% Plots
 if doPlots

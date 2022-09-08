@@ -20,7 +20,7 @@ for i = 1:length(gridHiddenUnits)
             y = gridDropOut(j);
             z = gridDropOut(m);
 
-            savingName = [savingPath,'subj',num2str(subject),'_net_','hdn',num2str(x),'_drop',num2str(y),'_',num2str(z)];
+            savingName = [savingPath,'subj',num2str(subject),'_net_','outF',num2str(x),'_drop',num2str(y),'_',num2str(z),'_2run'];
             net = load(savingName,'-mat');
 
             accuracies(i,j,m) = net.class.accuracy;
@@ -41,35 +41,36 @@ valueAcc = [gridHiddenUnits' valueAcc];
 % valueAcc = (idxAccCum-1)*0.3;
 
 %%
-clearvars; close all; clc;
+clearvars; 
+%close all; 
+clc;
 % x = 150;
 % [row,col] = find(valueAcc(:,1)==x);
 % y = valueAcc(row,2);
 % z = valueAcc(row,3);
-% 
-% savingName = [savingPath,'subj',num2str(subject),'_net_','hdn',num2str(x),'_drop',num2str(y),'_',num2str(z)];
-load('subj7_net_hdn45_drop0.3_0','-mat');
+savingPath='/home/palatella/workspace/palatella_net/';
+loadingName = [savingPath,'subj',num2str(7),'_net_','hidF',num2str(100),'_outF',num2str(7),'_drop',num2str(0.3),'_',num2str(0.1),'_macroRest'];
+load(loadingName,'-mat');
 % info = net.info;
 
 idx = ~isnan(info.ValidationAccuracy);
 figure()
-plot(info.ValidationAccuracy(idx),'b'), hold on
-plot(info.TrainingAccuracy(idx),'--'),
+plot(find(idx), info.ValidationAccuracy(idx),'b'), hold on
+plot(1:length(info.TrainingAccuracy),info.TrainingAccuracy,'--'),
 ylim([0 100])
-xlim([1 sum(idx)])
 title('Accuracy')
 
 idx = ~isnan(info.ValidationLoss);
 figure()
-plot(info.ValidationLoss(idx),'b'), hold on
-plot(info.TrainingLoss(idx),'--'),
+plot(find(idx),info.ValidationLoss(idx),'b'), hold on
+plot(1:length(info.TrainingLoss),info.TrainingLoss,'--'),
+ylim([0 5])
 title('Loss')
-xlim([1 sum(idx)])
 
-figure
-plot(accuracyThresholds)
-ylim([0 1])
-title('Cumulated accuracy')
+% figure
+% plot(accuracyThresholds)
+% ylim([0 1])
+% title('Cumulated accuracy')
 
 figure()
 confusionchart(confMatrix,'ColumnSummary','absolute','RowSummary','absolute','Normalization','row-normalized');
