@@ -2,8 +2,8 @@ close all; clearvars; clc;
 rng(12)
 
 subject = 7;
-gridHiddenUnits = 50:100:250;
-gridDropOut = [0 0.1 0.3];
+gridHiddenUnits = 150;
+gridDropOut = 0.3;
 % 
 % gridHiddenUnits = 100;
 % gridNumOutFeatures = 7;
@@ -18,7 +18,7 @@ savingPath='/home/palatella/workspace/palatella_net/';
 %%
 disp('importing the data')
 filename = ['subj',num2str(subject),'_psd.mat'];
-[Psd,settings] = startingTrain(filename);
+[Psd,settings] = startingTrain(filename,1:11);
 
 
 %% Creating and extracting windows
@@ -108,7 +108,7 @@ for q = gridHiddenUnits
                 bestAccuracy.gruDrop = z;
             end
 
-            savingName = [savingPath,'subj',num2str(subject),'_net_hUnits',num2str(q),'_drop',num2str(z),'_macroGRU'];
+            savingName = [savingPath,'subj',num2str(subject),'_net_hUnits',num2str(q),'_drop',num2str(z),'_totalClassesGRU'];
             save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
 %             end
         end
@@ -140,8 +140,8 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeura
         'Shuffle', 'once', ...
         'ValidationFrequency',validationFrequency, ...
         'Verbose',false, ...
-        'ExecutionEnvironment','gpu');%,...
-        %'Plots','training-progress');
+        'ExecutionEnvironment','gpu',...
+        'Plots','training-progress');
     
     % Training
     [net, info] = trainNetwork(inputTrain, outputTrain, layers, options);

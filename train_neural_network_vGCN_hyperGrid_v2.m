@@ -77,7 +77,9 @@ for x = gridNumOutFeatures
     end
 end
 
-save bestCaseScenario bestAccuracy
+save bestCaseScenario_GCN bestAccuracy
+
+clearvars
 
 
 function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeuralNetwork(settings, outputTrain, inputVal, outputVal, inputTrain, inputTest, outputTest)
@@ -104,8 +106,8 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeura
         'Shuffle', 'once', ...
         'ValidationFrequency',validationFrequency, ...
         'Verbose',false, ...
-        'ExecutionEnvironment','gpu');%,...
-        %'Plots','training-progress');
+        'ExecutionEnvironment','gpu',...
+        'Plots','training-progress');
     
     % Training
     [net, info] = trainNetwork(inputTrain, outputTrain, layers, options);

@@ -1,0 +1,116 @@
+close all; clearvars; clc;
+rng(12)
+
+subject = 7;
+
+NumHiddenUnits = 150;
+NumOutFeatures = 7;
+gcnDropOut = 0.3;
+gruDropOut = 0.3;
+
+endingName = '_macro';
+
+typeOfDataInput = 'sequence'; %'image'
+
+%%
+savingPath='/home/palatella/workspace/palatella_net/';
+disp('importing the data')
+filename = ['subj',num2str(subject),'_psd.mat'];
+[Psd,settings] = startingTrain(filename);
+
+%%
+disp('creating new windows label')
+settings.movwinLength = 2*settings.windowLength; % [s]
+settings.movwinShift = 2*settings.windowShift; % [s]
+
+[train, val, test] = splittingData(Psd,settings,typeOfDataInput);
+
+%%
+%% Testing neural network
+bestAccuracy.accuracy = 0;
+
+disp('model training')
+for q = NumHiddenUnits
+for x = NumOutFeatures 
+    for y =  gcnDropOut % of graph
+        for z = gruDropOut % of gru
+            disp(['hiddenUnits: ',num2str(q),'   OutFeatures: ',num2str(x),'   GcnDropOut: ',num2str(y),'   GruDropOut: ',num2str(z)])
+
+            settings.NumHiddenUnits = q;
+            settings.NumOutFeatures = x;
+            settings.gcnDropOut = y;
+            settings.gruDropOut = z;
+            [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeuralNetwork(settings, outputTrain, inputVal, outputVal, inputTrain, inputTest, outputTest);
+
+            if class.accuracy>bestAccuracy.accuracy
+                bestAccuracy.accuracy = class.accuracy;
+                bestAccuracy.hiddenUnits = q;
+                bestAccuracy.outFeatures = x;
+                bestAccuracy.gcnDrop = y;
+                bestAccuracy.gruDrop = z;
+            end
+
+
+            qName = ''; xName = ''; y=''; z ='';
+            drop = '_drop';
+            hidUnits = '_hidF';
+            if exist('NumHiddenUnits','var'), qName = [hidUnits,num2str(NumHiddenUnits)]; end
+            if exist('NumOutFeatures','var'), x = ['_outF',num2str(NumOutFeatures)]; end
+            if exist('gcnDropOut','var'), y = [drop,num2str(gcnDropOut)]; drop='_'; end
+            if exist('gruDropOut','var'), z = [drop,num2str(gruDropOut)]; end
+            
+            loadingName = [savingPath,'subj',num2str(subject),'_net',qName,x,y,z,endingName];
+            load(loadingName,'-mat');
+
+            savingName = [savingPath,'subj',num2str(subject),'_net_','hidF',num2str(q),'_outF',num2str(x),'_drop',num2str(y),'_',num2str(z),'_macro'];
+            save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
+            end
+    end
+end
+end
+
+save bestCaseScenario bestAccuracy
+
+
+function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeuralNetwork(settings, outputTrain, inputVal, outputVal, inputTrain, inputTest, outputTest)
+    layers = [
+        sequenceInputLayer(settings.inputSize,'Name','input','Normalization','zscore','NormalizationDimension','element')
+        sequenceFoldingLayer('Name','fold')
+        graphConvWithLearnStruct3Layer(settings.NumFeatures,settings.NumOutFeatures,settings.NumEMG,settings.NumEEG,'Name','GConv')
+        reluLayer('Name','relu')
+        batchNormalizationLayer
+        dropoutLayer(settings.gcnDropOut,'Name','GcnDrop')
+        sequenceUnfoldingLayer('Name','unfold')
+        flattenLayer('Name','flatten')
+        gruLayer(settings.NumHiddenUnits,'OutputMode','last','Name','gru')
+        dropoutLayer(settings.gruDropOut,'Name','GruDrop')
+        fullyConnectedLayer(settings.numClasses,'Name','fc')
+        softmaxLayer('Name','soft')
+        classificationLayer('Name','classification')];
+    lgraph = layerGraph(layers);
+    lgraph = connectLayers(lgraph,'fold/miniBatchSize','unfold/miniBatchSize');
+    
+    miniBatchSize = 1024*2; %512
+    validationFrequency = 2*floor(numel(outputTrain)/miniBatchSize);
+    options = trainingOptions('adam', ...
+        'MiniBatchSize',miniBatchSize, ...
+        'MaxEpochs',20, ...
+        'InitialLearnRate',1e-3, ...
+        'LearnRateSchedule','piecewise', ...
+        'LearnRateDropFactor',1e-1, ...
+        'LearnRateDropPeriod',8, ...
+        'ValidationData',{inputVal,outputVal}, ...
+        'Shuffle', 'once', ...
+        'ValidationFrequency',validationFrequency, ...
+        'Verbose',false, ...
+        'ExecutionEnvironment','gpu');%,...
+        %'Plots','training-progress');
+    
+    % Training
+    [net, info] = trainNetwork(inputTrain, outputTrain, lgraph, options);
+    
+    % Prediction and confusion matrix
+    [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings);
+    
+    accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings, []);
+end

@@ -16,12 +16,12 @@ filename = ['subj',num2str(subject),'_psd.mat'];
 
 settings.nFiltersCnn = 12;
 settings.sizeFiltersCnn = 65;
-settings.firstCnnDropOut = 0.3;
-settings.secondCnnDropOut = 0.3;
+settings.firstCnnDropOut = 0.1;
+settings.secondCnnDropOut = 0.1;
 settings.thirdCnnDropOut = 0.3;
 
 settings.nHiddenUnits = 300;
-settings.firstLstmDropOut = 0.3;
+settings.firstLstmDropOut = 0.1;
 settings.secondLstmDropOut = 0.3;
 
 %% Creating and extracting windows
@@ -115,7 +115,7 @@ clearvars -except input* output* settings grid* savingPath subject
 
 [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeuralNetwork(settings, outputTrain, inputVal, outputVal, inputTrain, inputTest, outputTest);
 
-savingName = [savingPath,'subj',num2str(subject),'_net_macroTCNN'];
+savingName = [savingPath,'subj',num2str(subject),'_net_macroCNN_LSTM'];
 save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
 
 
@@ -125,6 +125,8 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeura
     layers = [
         sequenceInputLayer(settings.inputSize,'Name','input','Normalization','zscore','NormalizationDimension','element')
 
+        flattenLayer('Name','flatten')
+
         lstmLayer(settings.nHiddenUnits)
         batchNormalizationLayer
         dropoutLayer(settings.firstLstmDropOut)
@@ -133,19 +135,17 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeura
         batchNormalizationLayer
         dropoutLayer(settings.secondLstmDropOut)
 
-        flattenLayer('Name','flatten')
-
-        convolution1dLayer(settings.sizeFiltersCnn,settings.nFiltersCnn)
+        convolution1dLayer(settings.sizeFiltersCnn,2*settings.nFiltersCnn)
         eluLayer
         batchNormalizationLayer
         dropoutLayer(settings.firstCnnDropOut)
 
-        convolution1dLayer(settings.sizeFiltersCnn,settings.nFiltersCnn)
+        convolution1dLayer(settings.sizeFiltersCnn,2*settings.nFiltersCnn)
         eluLayer
         batchNormalizationLayer
         dropoutLayer(settings.secondCnnDropOut)
 
-        convolution1dLayer(settings.sizeFiltersCnn,settings.nFiltersCnn)
+        convolution1dLayer(settings.sizeFiltersCnn,2*settings.nFiltersCnn)
         eluLayer
         batchNormalizationLayer
         dropoutLayer(settings.thirdCnnDropOut)
@@ -166,8 +166,8 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeura
         'Shuffle', 'once', ...
         'ValidationFrequency',validationFrequency, ...
         'Verbose',false, ...
-        'ExecutionEnvironment','gpu');%,...
-        %'Plots','training-progress');
+        'ExecutionEnvironment','gpu',...
+        'Plots','training-progress');
     
     % Training
     [net, info] = trainNetwork(inputTrain, outputTrain, layers, options);

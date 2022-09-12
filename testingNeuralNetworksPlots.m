@@ -3,10 +3,10 @@ rng(12)
 
 subject = 7;
 
-NumHiddenUnits = 1;
-NumOutFeatures = 1;
-gcnDropOut = 1;
-gruDropOut = 1;
+NumHiddenUnits = 150;
+NumOutFeatures = 7;
+gcnDropOut = 0.3;
+gruDropOut = 0.3;
 
 endingName = '_macro';
 
@@ -51,8 +51,12 @@ load(loadingName,'-mat');
 nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/settings.windowShift;
 t = (0:nWindowsTrial-1)*settings.windowShift;
 
+nTrial = length(test.output)/nWindowsTrial;
+trialClasses = reshape(test.output,nWindowsTrial,nTrial)';
+trialClasses = trialClasses(:,1);
+
 for i = settings.classes
-    idx = find(test.output==i);
+    idx = find(trialClasses==categorical(i));
     averageCumulOnClasses = squeeze(mean(prediction.cumul(idx,:,:)));
 
     figure()
