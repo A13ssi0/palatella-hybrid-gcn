@@ -8,7 +8,7 @@ NumOutFeatures = 7;
 gcnDropOut = 0.3;
 gruDropOut = 0.3;
 
-endingName = '_macro';
+endingName = '_parallel_doubleGRU_GCN';
 
 typeOfDataInput = 'sequence'; %'image'
 
@@ -16,17 +16,19 @@ typeOfDataInput = 'sequence'; %'image'
 savingPath='/home/palatella/workspace/palatella_net/';
 disp('importing the data')
 filename = ['subj',num2str(subject),'_psd.mat'];
-[Psd,settings] = startingTrain(filename);
+[Psd,settings] = startingTrain(filename,1:11);
 
 %%
 disp('creating new windows label')
 settings.movwinLength = 2*settings.windowLength; % [s]
 settings.movwinShift = 2*settings.windowShift; % [s]
 
+settings.dataSingle = true;
 [train, val, test] = splittingData(Psd,settings,typeOfDataInput);
 
 %% Testing neural network
 bestAccuracy.accuracy = 0;
+
 
 disp('model training')
 for q = NumHiddenUnits
@@ -37,10 +39,10 @@ for q = NumHiddenUnits
                 qName = ''; xName = ''; yName=''; zName ='';
                 drop = '_drop';
                 hidUnits = '_hidF';
-                if exist('NumHiddenUnits','var'), qName = [hidUnits,num2str(NumHiddenUnits)]; settings.NumHiddenUnits = q; end
-                if exist('NumOutFeatures','var'), xName = ['_outF',num2str(NumOutFeatures)]; settings.NumOutFeatures = x; end
-                if exist('gcnDropOut','var'), yName = [drop,num2str(gcnDropOut)]; drop='_'; settings.gcnDropOut = y; end
-                if exist('gruDropOut','var'), zName = [drop,num2str(gruDropOut)]; settings.gruDropOut = z; end
+                if exist('NumHiddenUnits','var'), qName = [hidUnits,num2str(q)]; settings.NumHiddenUnits = q; end
+                if exist('NumOutFeatures','var'), xName = ['_outF',num2str(x)]; settings.NumOutFeatures = x; end
+                if exist('gcnDropOut','var'), yName = [drop,num2str(y)]; drop='_'; settings.gcnDropOut = y; end
+                if exist('gruDropOut','var'), zName = [drop,num2str(z)]; settings.gruDropOut = z; end
                 disp([qName, '   ',xName,'   ',yName,'   ',zName])
     
 
@@ -55,8 +57,8 @@ for q = NumHiddenUnits
                     bestAccuracy.gruDrop = z;
                 end
     
-%                 savingName = [savingPath,'subj',num2str(subject),'_net',qName,xName,yName,zName,endingName];
-%                 save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
+                 savingName = [savingPath,'subj',num2str(subject),'_net',qName,xName,yName,zName,endingName];
+                 save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
              end
         end
     end
@@ -68,7 +70,8 @@ end
 function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeuralNetwork(settings, outputTrain, inputVal, outputVal, inputTrain, inputTest, outputTest)
 
     branchEMG = [
-        functionLayer(@(X) slicing(X,settings.NumEEG+1,settings.NumEMG), 'Name','SlicingEMG')
+        %flattenLayer('Name','flattenEMG')
+        functionLayer(@(X) slicing(X,settings.NumEEG+1,settings.NumEMG), 'Name','slicingEMG')
         flattenLayer('Name','flattenEMG')
         gruLayer(settings.NumHiddenUnits,'OutputMode','last','Name','gruEMG')
         dropoutLayer(settings.gruDropOut,'Name','GruDropEMG')];
@@ -76,7 +79,7 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeura
     
 
     layers = [
-        sequenceInputLayer(settings.inputSize,'Name','input','Normalization','zscore','NormalizationDimension','element')
+        sequenceInputLayer(settings.inputSize,'Name','input')%,'Normalization','zscore','NormalizationDimension','element')
         sequenceFoldingLayer('Name','fold')
         graphConvWithLearnStruct3LayerZeros(settings.NumFeatures,settings.NumOutFeatures,settings.NumEMG,settings.NumEEG,'Name','GConv')
         reluLayer('Name','relu')
@@ -90,7 +93,8 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeura
     
 
     branchEEG = [
-        functionLayer(@(X) slicing(X,1,settings.NumEEG), 'Name','SlicingEEG')
+        %flattenLayer('Name','flattenEEG')
+        functionLayer(@(X) slicing(X,1,settings.NumEEG), 'Name','slicingEEG')
         flattenLayer('Name','flattenEEG')
         gruLayer(settings.NumHiddenUnits,'OutputMode','last','Name','gruEEG')
         dropoutLayer(settings.gruDropOut,'Name','GruDropEEG')];
@@ -109,27 +113,26 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeura
     lgraph = connectLayers(lgraph,'GruDropGCN','concat/in2');
     lgraph = connectLayers(lgraph,'GruDropEMG','concat/in3');
 
-    lgraph = connectLayers(lgraph,'input','SlicingEMG');
-    lgraph = connectLayers(lgraph,'input','SlicingEEG');
-
     lgraph = connectLayers(lgraph,'fold/miniBatchSize','unfoldGCN/miniBatchSize');
+    lgraph = connectLayers(lgraph,'input','slicingEEG');
+    lgraph = connectLayers(lgraph,'input','slicingEMG');
     
 
-    miniBatchSize = 1024*2; %512
+    miniBatchSize = 1024/2; %512
     validationFrequency = 2*floor(numel(outputTrain)/miniBatchSize);
     options = trainingOptions('adam', ...
         'MiniBatchSize',miniBatchSize, ...
-        'MaxEpochs',20, ...
+        'MaxEpochs',10, ...
         'InitialLearnRate',1e-3, ...
         'LearnRateSchedule','piecewise', ...
         'LearnRateDropFactor',1e-1, ...
-        'LearnRateDropPeriod',8, ...
+        'LearnRateDropPeriod',4, ...
         'ValidationData',{inputVal,outputVal}, ...
         'Shuffle', 'once', ...
         'ValidationFrequency',validationFrequency, ...
         'Verbose',false, ...
-        'ExecutionEnvironment','gpu');%,...
-        %'Plots','training-progress');
+        'ExecutionEnvironment','gpu',...
+        'Plots','training-progress');
     
     % Training
     [net, info] = trainNetwork(inputTrain, outputTrain, lgraph, options);
@@ -141,5 +144,5 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeura
 end
 
 function featureMap = slicing(matrix, startingPoint, heigth)
-    featureMap = dlarray(matrix(startingPoint:startingPoint+heigth-1,:));
+    featureMap = matrix(startingPoint:startingPoint+heigth-1,:,:,:,:,:);
 end

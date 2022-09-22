@@ -108,13 +108,13 @@ for q = gridHiddenUnits
                 bestAccuracy.gruDrop = z;
             end
 
-            savingName = [savingPath,'subj',num2str(subject),'_net_hUnits',num2str(q),'_drop',num2str(z),'_totalClassesGRU'];
-            save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
-%             end
+%             savingName = [savingPath,'subj',num2str(subject),'_net_hUnits',num2str(q),'_drop',num2str(z),'_totalClassesGRU'];
+%             save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
+% %             end
         end
 end
 
-save bestCaseScenario bestAccuracy
+% save bestCaseScenario bestAccuracy
 
 
 function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeuralNetwork(settings, outputTrain, inputVal, outputVal, inputTrain, inputTest, outputTest)

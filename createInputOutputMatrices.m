@@ -4,6 +4,10 @@ nMonwinSize = settings.movwinLength/settings.windowShift;
 nMonwinShift = settings.movwinShift/settings.windowShift;
 nWindowsTrial = onsetNum(2,2)-onsetNum(1,2);
 
+if exist('settings.dataSingle','var') && settings.dataSingle
+    data = single(data);
+end
+
 input = cell(length(indicesToTake)*nWindowsTrial,1);
 output = nan(size(input));
 

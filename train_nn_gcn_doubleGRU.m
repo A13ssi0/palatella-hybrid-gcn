@@ -4,11 +4,11 @@ rng(12)
 subject = 7;
 
 NumHiddenUnits = 150;
-NumOutFeatures = 7;
+NumOutFeatures = 42;
 gcnDropOut = 0.3;
 gruDropOut = 0.3;
 
-endingName = '_macro';
+endingName = '_macroDoubleGRU';
 
 typeOfDataInput = 'sequence'; %'image'
 
@@ -16,7 +16,7 @@ typeOfDataInput = 'sequence'; %'image'
 savingPath='/home/palatella/workspace/palatella_net/';
 disp('importing the data')
 filename = ['subj',num2str(subject),'_psd.mat'];
-[Psd,settings] = startingTrain(filename);
+[Psd,settings] = startingTrain(filename,1:11);
 
 %%
 disp('creating new windows label')
@@ -55,8 +55,8 @@ for q = NumHiddenUnits
                     bestAccuracy.gruDrop = z;
                 end
     
-%                 savingName = [savingPath,'subj',num2str(subject),'_net',qName,xName,yName,zName,endingName];
-%                 save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
+                 savingName = [savingPath,'subj',num2str(subject),'_net',qName,xName,yName,zName,endingName];
+                 save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
              end
         end
     end
@@ -75,6 +75,7 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeura
         batchNormalizationLayer
         dropoutLayer(settings.gcnDropOut,'Name','GcnDrop')
 
+%         sequenceUnfoldingLayer('Name','unfold')
         functionLayer(@(X) slicing(X,1,settings.NumEEG), 'Name','SlicingEEG')
         sequenceUnfoldingLayer('Name','unfoldEEG')
         flattenLayer('Name','flattenEEG')
@@ -120,8 +121,8 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeura
         'Shuffle', 'once', ...
         'ValidationFrequency',validationFrequency, ...
         'Verbose',false, ...
-        'ExecutionEnvironment','gpu');%,...
-        %'Plots','training-progress');
+        'ExecutionEnvironment','gpu',...
+        'Plots','training-progress');
     
     % Training
     [net, info] = trainNetwork(inputTrain, outputTrain, lgraph, options);
@@ -133,5 +134,5 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeura
 end
 
 function featureMap = slicing(matrix, startingPoint, heigth)
-    featureMap = dlarray(matrix(startingPoint:startingPoint+heigth-1,:));
+    featureMap = dlarray(matrix(startingPoint:startingPoint+heigth-1,:,:,:));
 end
