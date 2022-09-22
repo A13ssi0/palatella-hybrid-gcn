@@ -187,7 +187,7 @@ save(sprintf(savingName, subj,'-v7.3'));
 
 %% IC selection
 % EEG1 = compute_extractepochs(subj);
-% EEG1.icaact = geticaact(EEG1);
+ EEG1.icaact = geticaact(EEG1);
 % EEG1 = iclabel(EEG1);
 % [art_comps] = ADJUST(EEG1,'report.txt');
 % pop_viewprops(EEG1, 0);
