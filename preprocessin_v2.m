@@ -1,9 +1,9 @@
 %%
 close all; clearvars; clc;
 
-savingPath = 'chanlocs/';  % add / at the end
+savingPath = '/home/palatella/workspace/palatella_datasets/'; 
 
-subject = 1;
+subject = 13;
 sessions = [1 2 3];
 
 secStartStop = 10;
@@ -122,7 +122,7 @@ for i = 1:size(EMG,2)
     EMG(:,i) = filtfilt(b,a,EMG(:,i)); 
 end 
 
-clearvars -except EEG EMG subj
+clearvars -except EEG EMG subj savingName
 
 %% Find Electrodes to Keep and Deleting the others
 disp('Deleting Electrodes')
@@ -157,7 +157,7 @@ subj.emg = pop_select(subj.emg, 'channel', subj.settings.emg.preprocessing.chann
 subj.emg.data = double(subj.emg.data);
 subj.settings.NumEMG = 6;
 
-clearvars -except subj
+clearvars -except subj savingName
 
 %% Re-referencing And Interpolating
 disp('Re-referencing And Interpolating FCz')
@@ -174,20 +174,24 @@ subj.settings.NumEEG = subj.eeg.nbchan;
 %% ASR
 subj.eeg = compute_asr(subj.eeg, subj.settings);
 subj.settings.doneASR = 'yes';
+save(savingName, 'subj','-v7.3');
+
 
 %% CCA
 subj.eeg = compute_cca(subj.eeg, subj.settings);
 subj.settings.doneCCA = 'yes';
-save(sprintf(savingName, subj,'-v7.3'));
+save(savingName, 'subj','-v7.3');
 
 %% ICA
 subj.eeg = compute_ica(subj.eeg, subj.settings);
 subj.settings.doneICA = 'yes';
-save(sprintf(savingName, subj,'-v7.3'));
+save(savingName, 'subj','-v7.3');
 
 %% IC selection
+% savingName = [savingPath,'subj',num2str(subject),'_pruned.mat'];
+% 
 % EEG1 = compute_extractepochs(subj);
- EEG1.icaact = geticaact(EEG1);
+% EEG1.icaact = geticaact(EEG1);
 % EEG1 = iclabel(EEG1);
 % [art_comps] = ADJUST(EEG1,'report.txt');
 % pop_viewprops(EEG1, 0);
@@ -196,7 +200,7 @@ save(sprintf(savingName, subj,'-v7.3'));
 % prompt = 'Enter the components to remove:\n';
 % rm_comps = (str2num(input(prompt, "s")))';
 % subj.eeg = pop_subcomp(subj.eeg,rm_comps);
-
+% save(savingName, 'subj','-v7.3')
 %   save(sprintf(savingName, subj,'-v7.3'));
 
 
