@@ -24,6 +24,7 @@ idxTest = [];
 % dividind in train, validation and test set
 for i = settings.classes
     idxLabel = find(num == i);
+    numTrials = length(idxLabel);
     numTrain = round(numTrials*settings.fractTrain);
     numVal = round(numTrials*settings.fractVal);
     numTest = round(numTrials*settings.fractTest);

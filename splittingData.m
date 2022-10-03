@@ -3,7 +3,7 @@ function [train, validation, test] = splittingData(data,settings,type)
 num = data.triggers.num;
 windowsLabel = data.windowsLabel;
 
-if length(size(data))==2
+if length(size(data.data))==2
     allSxx = permute(data.data,[1,3,4,2]);
     nSamples = size(allSxx,4);
     settings.windowShift = 1/settings.eeg.fs;
