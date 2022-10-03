@@ -5,9 +5,9 @@ epoch = subj.settings.step_epoch;
 triggers = subj.triggers;
 EEG = subj.eeg;
 labels = unique(subj.triggers.type);
-labels(contains(labels,'rest','IgnoreCase',true)) = {};
+labels(contains(labels,'rest','IgnoreCase',true)) = [];
 
-data_epoch = extractepochs(EEG.data',triggers,labels,epoch,eeg.srate);
+data_epoch = extractepochs(EEG.data',triggers,labels,epoch,EEG.srate);
 
 EEG.other.eeg = EEG;
 EEG.data = permute(data_epoch, [2 1 3]);

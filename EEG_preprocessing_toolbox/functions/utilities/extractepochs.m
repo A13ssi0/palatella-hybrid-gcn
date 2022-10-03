@@ -9,11 +9,12 @@ ncolons = repmat({':'},1,ndim-1);
 ntrials = length(trials_typ);
 
 data_epoch = [];
+warning('off','all')
 for t = 1:ntrials
     tstart = trials_pos(t) + epoch(1)*fs;
     tstop = tstart + nsamps - 1;
     data_epoch = cat(ndim+1, data_epoch, data(tstart:tstop, ncolons{:}));
 end
-
+warning('on','all')
 end
 
