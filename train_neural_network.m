@@ -120,7 +120,7 @@ accuracy = thresholdAccuracy(pred.cumul, outputTest, settings, [], true);
 
 
 %% Plot of the features
-Wa = double(net.Layers(2).Wa);
+Wa = double(net.Layers(3).Wa);
 Aui = triu(ones(settings.NumChannels));
 Al = tril(ones(settings.NumChannels),-1);
 A = Aui;
@@ -137,11 +137,11 @@ eeg_labels = {ch35.labels};
 emg_labels = {ch7(1:6).labels};
 
 figure
-imagesc(Atmp,[0 0.3])
-xticks(1:size(A,1))
-xticklabels(cat(2,eeg_labels,emg_labels))
-yticks(1:size(A,1))
-yticklabels(cat(2,eeg_labels,emg_labels))
+imagesc(Wa,[0 1])
+% xticks(1:size(A,1))
+% xticklabels(cat(2,eeg_labels,emg_labels))
+% yticks(1:size(A,1))
+% yticklabels(cat(2,eeg_labels,emg_labels))
 colorbar
 
 figure

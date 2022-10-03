@@ -20,7 +20,6 @@ for i = 1:length(indicesToTake)
     end
 
     countTrial = 0;
-
     for j = idxSequencie
         countTrial = countTrial+1;
         start = (j-1)*nMonwinShift+1; stop = start + nMonwinSize - 1;

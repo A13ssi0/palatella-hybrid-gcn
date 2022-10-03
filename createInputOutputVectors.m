@@ -11,8 +11,11 @@ for i = 1:length(indicesToTake)
     end
 end
 
+
+
 input = zeros([settings.inputSize length(timeSeries)]);
 for i = 1:length(timeSeries)
-    input(:,:,1,i) = squeeze(data(timeSeries(i),settings.idxFrequencyChoosen,:))';
+    input(:,:,1,i) = squeeze(data(timeSeries(i),:,:))';
 end
+
 output = categorical(windowsLabel(timeSeries));

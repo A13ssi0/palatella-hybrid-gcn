@@ -7,13 +7,13 @@ loadingPath='/home/palatella/workspace/palatella_datasets/';
 savingPath='/home/palatella/workspace/palatella_net/';
 
 typeOfMl = 'LDA';
-endName = '';
+endName = 'macro';
 
 disp('importing the data')
 filename = ['subj',num2str(subject),'_featuresEMG.mat'];
 load(filename)
 
-doMacro = false;
+doMacro = true;
 %%
 settings.movwinLength = settings.windowLength; % [s]
 settings.movwinShift = settings.windowShift; % [s]
@@ -81,10 +81,13 @@ trainOutput = windowsLabel(finalIdxTrain);
 
 %%
 disp('Training Machine Learning Model')
-% tmplSVM = templateSVM("KernelFunction","gaussian");
-% mlModel = fitcecoc(trainInput,categorical(trainOutput),"ObservationsIn","columns","Learners",tmplSVM);
- mlModel = fitcdiscr(trainInput',categorical(trainOutput'));
+  tmplSVM = templateSVM("KernelFunction","gaussian");
+  mlModel = fitcecoc(trainInput,categorical(trainOutput),"ObservationsIn","columns","Learners",tmplSVM);
 
+  mlModel = fitcdiscr(trainInput',categorical(trainOutput'));
+
+% tmplTree = templateTree('Type','classification');
+% mlModel = fitcecoc(trainInput,categorical(trainOutput),"ObservationsIn","columns","Learners",tmplTree);
 
 %%
 testInput = [

@@ -48,8 +48,22 @@ clc;
 % [row,col] = find(valueAcc(:,1)==x);
 % y = valueAcc(row,2);
 % z = valueAcc(row,3);
+
+q = 150;
+x = 25;
+y = 0.1;
+z = 0.1;
+endingName = '_DoubleGRU_time';
+                drop = '_drop';
+                hidUnits = '_hidF';
+                 qName = [hidUnits,num2str(q)]; 
+                xName = ['_outF',num2str(x)]; 
+                yName = [drop,num2str(y)]; drop='_';
+                zName = [drop,num2str(z)];
+
 savingPath='/home/palatella/workspace/palatella_net/';
-loadingName = [savingPath,'subj',num2str(7),'_net_','hidF',num2str(100),'_outF',num2str(7),'_drop',num2str(0.3),'_',num2str(0.1),'_macroRest'];
+loadingName = [savingPath,'subj',num2str(subject),'_net',qName,xName,yName,zName,endingName];
+%loadingName = [savingPath,'subj',num2str(7),'_net_','hidF',num2str(100),'_outF',num2str(7),'_drop',num2str(0.3),'_',num2str(0.1),'_macroRest'];
 load(loadingName,'-mat');
 % info = net.info;
 

@@ -1,16 +1,16 @@
 close all; clearvars; clc;
-rng(12)
 
-subject = 7;
+subject = 11;
 
 NumHiddenUnits = 150;
 NumOutFeatures = 7;
 gcnDropOut = 0.3;
 gruDropOut = 0.3;
 
-endingName = '_parallel_doubleGRU_GCN';
+endingName = '_parallel_doubleGRU_GCN_noNormalization';
 
 typeOfDataInput = 'sequence'; %'image'
+doSave = true;
 
 %%
 savingPath='/home/palatella/workspace/palatella_net/';
@@ -57,9 +57,11 @@ for q = NumHiddenUnits
                     bestAccuracy.gruDrop = z;
                 end
     
-                 savingName = [savingPath,'subj',num2str(subject),'_net',qName,xName,yName,zName,endingName];
-                 save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
-             end
+                if doSave
+                    savingName = [savingPath,'subj',num2str(subject),'_net',qName,xName,yName,zName,endingName];
+                    save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');             
+                end
+            end
         end
     end
 end
@@ -118,15 +120,15 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeura
     lgraph = connectLayers(lgraph,'input','slicingEMG');
     
 
-    miniBatchSize = 1024/2; %512
-    validationFrequency = 2*floor(numel(outputTrain)/miniBatchSize);
+    miniBatchSize = 1024/4; %512
+    validationFrequency = floor(numel(outputTrain)/miniBatchSize);
     options = trainingOptions('adam', ...
         'MiniBatchSize',miniBatchSize, ...
-        'MaxEpochs',10, ...
+        'MaxEpochs',5, ...
         'InitialLearnRate',1e-3, ...
         'LearnRateSchedule','piecewise', ...
         'LearnRateDropFactor',1e-1, ...
-        'LearnRateDropPeriod',4, ...
+        'LearnRateDropPeriod',2, ...
         'ValidationData',{inputVal,outputVal}, ...
         'Shuffle', 'once', ...
         'ValidationFrequency',validationFrequency, ...
