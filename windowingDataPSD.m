@@ -1,7 +1,11 @@
 close all; clearvars; clc;
 
-load subj11_pruned.mat
-savingPath = '';
+subject = 23;
+
+savingPath='/home/palatella/workspace/palatella_datasets/';
+disp('importing the data')
+filename = ['subj',num2str(subject),'_pruned.mat'];
+load(filename)
 
 %%
 h_EMG = hilbert(subj.emg.data);
@@ -76,5 +80,6 @@ PSD.triggers.time(2:2:end) = PSD.triggers.time(1:2:end) + nWindowPostMov + nWind
 
 
 %% SAVING
-%save(sprintf(savingName, subj,'-v7.3'));
+savingName = [savingPath,'subj',num2str(subject),'_psd.mat'];
+save(savingName, 'PSD','-v7.3');
 %save subj11_psd PSD -v7.3

@@ -1,7 +1,7 @@
 close all; clearvars; clc;
 rng(12)
 
-subject = 11;
+subject = 23;
 
 savingPath='/home/palatella/workspace/palatella_datasets/';
 disp('importing the data')

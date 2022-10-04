@@ -1,6 +1,6 @@
 close all; clearvars; clc;
 
-subject = 7;
+subject = 19;
 
 filename = ['subj',num2str(subject),'_pruned.mat'];
 load(filename)

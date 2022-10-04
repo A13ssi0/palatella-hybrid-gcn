@@ -70,8 +70,8 @@ for q = NumHiddenUnits
                     bestAccuracy.gruDrop = z;
                 end
     
-                  savingName = [savingPath,'subj',num2str(subject),'_net',qName,xName,yName,zName,endingName];
-                  save(savingName,'net','info','settings','accuracy','-v7.3');
+%                   savingName = [savingPath,'subj',num2str(subject),'_net',qName,xName,yName,zName,endingName];
+%                   save(savingName,'net','info','settings','accuracy','-v7.3');
             end
         end
     end

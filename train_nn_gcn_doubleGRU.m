@@ -54,10 +54,10 @@ for q = NumHiddenUnits
                     bestAccuracy.gcnDrop = y;
                     bestAccuracy.gruDrop = z;
                 end
-    
-                 savingName = [savingPath,'subj',num2str(subject),'_net',qName,xName,yName,zName,endingName];
-                 save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
-             end
+%     
+%                  savingName = [savingPath,'subj',num2str(subject),'_net',qName,xName,yName,zName,endingName];
+%                  save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
+              end
         end
     end
 end
@@ -112,7 +112,7 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = testingNeura
     validationFrequency = floor(numel(outputTrain)/miniBatchSize);
     options = trainingOptions('adam', ...
         'MiniBatchSize',miniBatchSize, ...
-        'MaxEpochs',6, ...
+        'MaxEpochs',1, ...
         'InitialLearnRate',1e-3, ...
         'LearnRateSchedule','piecewise', ...
         'LearnRateDropFactor',1e-1, ...
