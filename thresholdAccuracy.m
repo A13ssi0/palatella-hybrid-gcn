@@ -1,6 +1,6 @@
-function accuracy = thresholdAccuracy(predictionCumul, outputTestSet, settings, th_seconds, doPlot)
+function accuracy = thresholdAccuracy(predictionCumul, outputTestSet, settings, th_seconds, doPlot, windowSeconds)
 
-if ~exist('doPlot','var') 
+if ~exist('doPlot','var') || isempty(doPlot)
     doPlot = false;
 end
 
@@ -12,7 +12,12 @@ if ~isempty(th_seconds) && mod(th_seconds,settings.windowShift) >0
     warning('Threshold is not an integer number of windows. Rounded towards zero')
 end
 
-nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/settings.windowShift;
+if exist('windowSeconds','var')
+    nWindowsTrial = windowSeconds/settings.windowShift;
+else
+    nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/settings.windowShift;
+end
+
 nTrial = length(outputTestSet)/nWindowsTrial;
 trialClasses = reshape(outputTestSet,nWindowsTrial,nTrial)';
 

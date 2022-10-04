@@ -1,4 +1,4 @@
-function [net, info, accuracy] = nn_GCN_dGRU_parallelTime(train,val,test,settings,savingPath,isMacro)
+function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN_dGRU_parallelTime(train,val,test,settings,savingPath,isMacro)
 % input = 'sequence'
 
     startingName = 'nn_GCN_dGRU_parallelTime';
@@ -6,19 +6,19 @@ function [net, info, accuracy] = nn_GCN_dGRU_parallelTime(train,val,test,setting
     
     disp(['Training GCN_dGRU_parallelTime for subject ',num2str(settings.numSubject)]);
      
-    [net, info, accuracy] = GCN_dGRU_parallelTime(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
+    [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_parallelTime(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
     
     if exist('savingPath','var')
         savingName = [savingPath,startingName,'subj',num2str(subject)];
-        save(savingName,'net','info','accuracy','settings','-v7.3');
+        save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
     end
 
 end
 
 
-function [net, info, accuracy] = GCN_dGRU_parallelTime(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest)
+function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_parallelTime(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest)
 
-    branchEMG = [
+   branchEMG = [
         functionLayer(@(X) slicing(X,settings.NumEEG+1,settings.NumEMG), 'Name','slicingEMG')
         flattenLayer('Name','flattenEMG')
         gruLayer(settings.NumHiddenUnits,'OutputMode','last','Name','gruEMG')
@@ -85,9 +85,9 @@ function [net, info, accuracy] = GCN_dGRU_parallelTime(settings, inputTrain, out
     [net, info] = trainNetwork(inputTrain, outputTrain, lgraph, options);
     
     % Prediction and confusion matrix
-    YLabs = classify(net,inputTest);
-    accuracy = sum(YLabs == outputTest)/numel(outputTest);
-    disp(['accuracy of: ',num2str(accuracy)]);
+    [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings, [], settings.movwinLength);
+    
+    accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings, [], [], settings.movwinLength);
 end
 
 function featureMap = slicing(matrix, startingPoint, heigth)
