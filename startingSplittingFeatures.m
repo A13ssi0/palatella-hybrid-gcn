@@ -1,14 +1,17 @@
-function [trainFeatures,testFeatures] = startingSplittingFeatures(filename,settings,doMacro)
+function [trainFeatures,testFeatures,settings] = startingSplittingFeatures(filename,classes)
 
 load(filename)
 
 settings.movwinLength = settings.windowLength; % [s]
 settings.movwinShift = settings.windowShift; % [s]
 
-if doMacro
+if ~exist('classes','var') || isempty(classes)
     windowsLabel(windowsLabel>=1 & windowsLabel<=2) = 1;
     windowsLabel(windowsLabel>=3 & windowsLabel<=8) = 2;
     windowsLabel(windowsLabel>=9 & windowsLabel<=11) = 3;
+    settings.classes = 1:3;
+else
+    settings.classes = classes;
 end
 
 tWinlabel = windowsLabel;

@@ -1,10 +1,15 @@
-function [confMatrix, classification, prediction] = trial_predict(net, inputTestSet, outputTestSet, settings, doPlots)
+function [confMatrix, classification, prediction] = trial_predict(net, inputTestSet, outputTestSet, settings, doPlots, windowSeconds)
 
-if ~exist('doPlots','var')
+if ~exist('doPlots','var')  || isempty(doPlot)
     doPlots = false;
 end
 
-nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/settings.windowShift;
+if exist('windowSeconds','var')
+    nWindowsTrial = windowSeconds/settings.windowShift;
+else
+    nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/settings.windowShift;
+end
+
 nTrial = length(outputTestSet)/nWindowsTrial;
 trialClasses = reshape(outputTestSet,nWindowsTrial,nTrial)';
 

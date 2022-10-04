@@ -1,22 +1,22 @@
-function [net, info, accuracy] = nn_GCN_Time(train,val,test,settings,savingPath,isMacro)
+function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN_Time(train,val,test,settings,savingPath,isMacro)
 % input = 'image'
 
-    startingName = 'nn_GCN_Time_';
+    startingName = 'nn_GCN_Time';
     if isMacro,     startingName = [startingName, 'macro_'];   end
     
     disp(['Training GCN_Time for subject ',num2str(settings.numSubject)]);
      
-    [net, info, accuracy] = GCN_Time(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
+    [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_Time(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
     
     if exist('savingPath','var')
         savingName = [savingPath,startingName,'subj',num2str(subject)];
-        save(savingName,'net','info','accuracy','settings','-v7.3');
+        save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
     end
 
 end
 
 
-function [net, info, accuracy] = GCN_Time(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest)
+function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_Time(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest)
     
     lgraph = [
         imageInputLayer(settings.inputSize,'Normalization','zscore','NormalizationDimension','element')
@@ -48,9 +48,9 @@ function [net, info, accuracy] = GCN_Time(settings, inputTrain, outputTrain, inp
     [net, info] = trainNetwork(inputTrain, outputTrain, lgraph, options);
     
     % Prediction and confusion matrix
-    YLabs = classify(net,inputTest);
-    accuracy = sum(YLabs == outputTest)/numel(outputTest);
-    disp(['accuracy of: ',num2str(accuracy)]);
+    [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings);
+    
+    accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings, []);
 end
 
 

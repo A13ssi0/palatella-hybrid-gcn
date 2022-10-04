@@ -1,4 +1,4 @@
-function [net, info, accuracy] = nn_GCN_dGRU_sequenceTime(train,val,test,settings,savingPath,isMacro)
+function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN_dGRU_sequenceTime(train,val,test,settings,savingPath,isMacro)
 % input = 'sequence'
 
     startingName = 'nn_GCN_dGRU_sequenceTime_';
@@ -6,17 +6,17 @@ function [net, info, accuracy] = nn_GCN_dGRU_sequenceTime(train,val,test,setting
     
     disp(['Training GCN_dGRU_sequenceTime for subject ',num2str(settings.numSubject)]);
      
-    [net, info, accuracy] = GCN_dGRU_sequenceTime(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
+    [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_sequenceTime(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
     
     if exist('savingPath','var')
         savingName = [savingPath,startingName,'subj',num2str(subject)];
-        save(savingName,'net','info','accuracy','settings','-v7.3');
+        save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
     end
 
 end
 
 
-function [net, info, accuracy] = GCN_dGRU_sequenceTime(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest)
+function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_sequenceTime(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest)
 
     layers = [
         sequenceInputLayer(settings.inputSize,'Name','input','Normalization','zscore','NormalizationDimension','element')
@@ -78,12 +78,9 @@ function [net, info, accuracy] = GCN_dGRU_sequenceTime(settings, inputTrain, out
     [net, info] = trainNetwork(inputTrain, outputTrain, lgraph, options);
     
     % Prediction and confusion matrix
-    %[confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings);
-    %accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings, []);
-    %YPred = predict(net,val_S(:,:,:,1199:end));
-    YLabs = classify(net,inputTest);
-    accuracy = sum(YLabs == outputTest)/numel(outputTest);
-    disp(['accuracy of: ',num2str(accuracy)]);
+    [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings, [], settings.movwinLength);
+    
+    accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings, [], [], settings.movwinLength);
 end
 
 function featureMap = slicing(matrix, startingPoint, heigth)
