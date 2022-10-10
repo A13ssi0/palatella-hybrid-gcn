@@ -1,10 +1,10 @@
-function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN_dGRU_sequenceTime(train,val,test,settings,savingPath,isMacro)
+function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN_dGRU_sequenceTime(subject, train,val,test,settings,savingPath,isMacro)
 % input = 'sequence'
 
     startingName = 'nn_GCN_dGRU_sequenceTime_';
     if isMacro,     startingName = [startingName, 'macro_'];   end
     
-    disp(['Training GCN_dGRU_sequenceTime for subject ',num2str(settings.numSubject)]);
+    disp(['Training GCN_dGRU_sequenceTime for subject ',num2str(subject)]);
      
     [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_sequenceTime(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
     
@@ -84,5 +84,5 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_seq
 end
 
 function featureMap = slicing(matrix, startingPoint, heigth)
-    featureMap = dlarray(matrix(startingPoint:startingPoint+heigth-1,:,:,:));
+    featureMap = dlarray(matrix(startingPoint:startingPoint+heigth-1,:,:,:,:,:));
 end

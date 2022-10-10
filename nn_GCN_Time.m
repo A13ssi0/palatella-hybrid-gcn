@@ -1,10 +1,10 @@
-function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN_Time(train,val,test,settings,savingPath,isMacro)
+function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN_Time(subject,train,val,test,settings,savingPath,isMacro)
 % input = 'image'
 
     startingName = 'nn_GCN_Time';
     if isMacro,     startingName = [startingName, 'macro_'];   end
     
-    disp(['Training GCN_Time for subject ',num2str(settings.numSubject)]);
+    disp(['Training GCN_Time for subject ',num2str(subject)]);
      
     [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_Time(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
     
@@ -40,9 +40,9 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_Time(set
         'ValidationData',{inputVal,outputVal}, ...
         'Shuffle', 'once', ...
         'ValidationFrequency',validationFrequency, ...
-        'Plots','training-progress', ...
         'Verbose',false, ...
         'ExecutionEnvironment','gpu');
+    %        'Plots','training-progress', ...
     
     % Training
     [net, info] = trainNetwork(inputTrain, outputTrain, lgraph, options);

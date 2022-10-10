@@ -1,45 +1,72 @@
-function [trainPsd, valPsd, testPsd, trainPsdImage, valPsdImage, testPsdImage, settingsPsd, trainTime, valTime, testTime, trainTimeImage, valTimeImage, testTimeImage, settingsTime, trainFeatures, testFeatures, settingsFeatures] = preparingALLtheInputsAndOutputs(numSubject,classes)
+function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,typeOfData, typeOfInput)
+
+    NumHiddenUnits = 150;
+    NumOutFeatures = 42;
+    gcnDropOut = 0.3;
+    gruDropOut = 0.3;
+
+    cutLowFreq = 8;
+    cutHighFreq = 30;
+
+
+
 
     % importings PSD -------------------------------------------------------------------------------
+    if strcmpi(typeOfData,'psd')
     disp(['importing and splitting the PSD of subject ',num2str(numSubject)])
     filenamePSD = ['subj',num2str(numSubject),'_psd.mat'];
-    [Psd,settingsPsd] = startingTrain(filenamePSD,classes);
+    [Psd,settings] = startingTrain(filenamePSD,classes);
 
+    if strcmpi(typeOfInput,'sequence')
     typeOfDataInput = 'sequence';
-    settingsPsd.movwinLength = 2*settingsPsd.windowLength; % [s]
-    settingsPsd.movwinShift = 2*settingsPsd.windowShift; % [s]
-    [trainPsd, valPsd, testPsd] = splittingData(Psd,settingsPsd,typeOfDataInput);
-
+    settings.movwinLength = 2*settings.windowLength; % [s]
+    settings.movwinShift = 2*settings.windowShift; % [s]
+    [train, val, test] = splittingData(Psd,settings,typeOfDataInput);
+    elseif strcmpi(typeOfInput,'image')
     typeOfDataInput = 'image';
-    [trainPsdImage, valPsdImage, testPsdImage] = splittingData(Psd,settingsPsd,typeOfDataInput);
-
+    [train, val, test] = splittingData(Psd,settings,typeOfDataInput);
+    end
+    end
     
     % importings time -------------------------------------------------------------------------------
+    if strcmpi(typeOfData,'time')
     disp(['importing and splitting the time series of subject ',num2str(numSubject)])
     filenameTime = ['subj',num2str(numSubject),'_labeledRaw.mat'];
-    [timeSeries,settingsTime] = startingTrain(filenameTime,classes);
-    fs = settingsTime.eeg.fs;
+    [timeSeries,settings] = startingTrain(filenameTime,classes);
+    fs = settings.eeg.fs;
 
     [b,a] = butter(4,cutLowFreq/(fs/2),'high');
     [d,c] = butter(4,cutHighFreq/(fs/2),'low');
-    for i = 1:settingsTime.NumEEG
-        timeSeries.data(i,:) = filtfilt(b,a,timeSeries.data(i,:)); 
-        timeSeries.data(i,:) = filtfilt(d,c,timeSeries.data(i,:));  
+    for i = 1:settings.NumEEG
+        timeSeries.data(i,:) = filtfilt(b,a,double(timeSeries.data(i,:))); 
+        timeSeries.data(i,:) = filtfilt(d,c,double(timeSeries.data(i,:)));  
     end
 
+    if strcmpi(typeOfInput,'sequence')
     typeOfDataInput = 'sequence';
-    settingsTime.windowShift = 1/fs;
-    settingsTime.movwinLength = 1;
-    settingsTime.movwinShift = 0.04; 
-    [trainTime, valTime, testTime] = splittingData(timeSeries,settingsTime,typeOfDataInput);
-
+    settings.windowShift = 1/fs;
+    settings.movwinLength = 1;
+    settings.movwinShift = 0.04; 
+    [train, val, test] = splittingData(timeSeries,settings,typeOfDataInput);
+    elseif strcmpi(typeOfInput,'image')
+    settings.windowShift = 1/fs;
     typeOfDataInput = 'image';
-    [trainTimeImage, valTimeImage, testTimeImage] = splittingData(timeSeries,settingsTime,typeOfDataInput);
-
+    [train, val, test] = splittingData(timeSeries,settings,typeOfDataInput);
+    end
+    end
 
     % importings features -------------------------------------------------------------------------------
+    if strcmpi(typeOfData,'features')
     disp(['importing and splitting the features of subject ',num2str(numSubject)])
-    filenameFeat = ['subj',num2str(subject),'_featuresEMG.mat'];
-    [trainFeatures,testFeatures,settingsFeatures] = startingSplittingFeatures(filenameFeat,classes);
+    filenameFeat = ['subj',num2str(numSubject),'_featuresEMG.mat'];
+    [train,test,settings] = startingSplittingFeatures(filenameFeat,classes);
+    val = [];
+    end
+
+
+    settings.NumHiddenUnits = NumHiddenUnits;
+    settings.NumOutFeatures = NumOutFeatures;
+    settings.gcnDropOut = gcnDropOut;
+    settings.gruDropOut = gruDropOut;
 
 end

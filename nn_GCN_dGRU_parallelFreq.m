@@ -1,10 +1,10 @@
-function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN_dGRU_parallelFreq(train,val,test,settings,savingPath,isMacro)
+function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN_dGRU_parallelFreq(subject, train,val,test,settings,savingPath,isMacro)
 % input = 'sequence'
 
     startingName = 'nn_GCN_dGRU_parallelFreq';
     if isMacro,     startingName = [startingName, 'macro_'];   end
     
-    disp(['Training GCN_dGRU_parallelFreq for subject ',num2str(settings.numSubject)]);
+    disp(['Training GCN_dGRU_parallelFreq for subject ',num2str(subject)]);
      
     [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_parallelFreq(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
     
@@ -19,6 +19,7 @@ end
 function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_parallelFreq(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest)
 
    branchEMG = [
+        %flattenLayer('Name','flattenEMG')
         functionLayer(@(X) slicing(X,settings.NumEEG+1,settings.NumEMG), 'Name','slicingEMG')
         flattenLayer('Name','flattenEMG')
         gruLayer(settings.NumHiddenUnits,'OutputMode','last','Name','gruEMG')
@@ -41,6 +42,7 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_par
     
 
     branchEEG = [
+        %flattenLayer('Name','flattenEEG')
         functionLayer(@(X) slicing(X,1,settings.NumEEG), 'Name','slicingEEG')
         flattenLayer('Name','flattenEEG')
         gruLayer(settings.NumHiddenUnits,'OutputMode','last','Name','gruEEG')
@@ -63,7 +65,6 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_par
     lgraph = connectLayers(lgraph,'fold/miniBatchSize','unfoldGCN/miniBatchSize');
     lgraph = connectLayers(lgraph,'input','slicingEEG');
     lgraph = connectLayers(lgraph,'input','slicingEMG');
-    
 
     miniBatchSize = 1024/4; %512
     validationFrequency = floor(numel(outputTrain)/miniBatchSize);
@@ -91,5 +92,5 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_par
 end
 
 function featureMap = slicing(matrix, startingPoint, heigth)
-    featureMap = dlarray(matrix(startingPoint:startingPoint+heigth-1,:,:,:));
+    featureMap = matrix(startingPoint:startingPoint+heigth-1,:,:,:,:,:);
 end

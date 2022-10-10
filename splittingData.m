@@ -32,7 +32,7 @@ elseif strcmpi(type,'image')
     onsetNum = num;
 end
 
-disp('creating new windows label')
+%disp('creating new windows label')
 
 idxTrain = [];idxVal = [];idxTest = [];
 
@@ -52,7 +52,7 @@ for i = settings.classes
     idxTest = [idxTest; tempidxTest];
 end
 
-disp('creating the input matrix')
+%disp('creating the input matrix')
 
 if strcmpi(type,'sequence')
     [train.input, train.output] = createInputOutputMatrices(allSxx, idxTrain, onsetNum, settings);

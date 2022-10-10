@@ -23,8 +23,8 @@ else
 
     settings.NumChannels = size(PSD.data,3);
     settings.trainChoosenFreq = 4:30; 
-    settings.NumFeatures = length(settings.trainChoosenFreq);
     [settings.trainChoosenFreq,~,settings.idxFrequencyChoosen] = intersect(settings.trainChoosenFreq, PSD.frequency);
+    settings.NumFeatures = length(settings.trainChoosenFreq);
 end
 
 windowsNum = data.triggers.num;

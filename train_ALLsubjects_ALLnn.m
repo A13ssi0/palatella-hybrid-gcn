@@ -1,16 +1,9 @@
 close all; clearvars; clc;
 
-subjects = [7 11 19 23]; %13
+subjects = [7 11 19 23]; %13, 7 11 19 23
 
-NumHiddenUnits = 150;
-NumOutFeatures = 42;
-gcnDropOut = 0.3;
-gruDropOut = 0.3;
 
-cutLowFreq = 8;
-cutHighFreq = 30;
-
-doMacro = true;
+doMacro = false;
 
 savingPath='/home/palatella/workspace/palatella_net/results_run/';
 
@@ -23,18 +16,26 @@ if doMacro, classes = [];   end
 isMacro = doMacro;
 
 for numSubject = subjects
+  %type of data, type of input  
+    [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'psd','sequence');
+    nn_GCN_dGRU_parallelFreq(numSubject, train, val, test, settings, savingPath, isMacro);
+    nn_GCN_dGRU_sequenceFreq(numSubject, train, val, test, settings, savingPath, isMacro);
+
+
+    [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'time','sequence');
+    nn_GCN_dGRU_parallelTime(numSubject, train, val, test, settings, savingPath, isMacro);
+    nn_GCN_dGRU_sequenceTime(numSubject, train, val, test, settings, savingPath, isMacro);
+
+
+    [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'psd','image');
+    nn_GCN_Freq(numSubject, train, val, test, settings, savingPath, isMacro);
     
-    [trainPsd, valPsd, testPsd, trainPsdImage, valPsdImage, testPsdImage, settingsPsd, trainTime, valTime, testTime, trainTimeImage, valTimeImage, testTimeImage, settingsTime, trainFeatures, testFeatures, settingsFeatures] = preparingALLtheInputsAndOutputs(numSubject,classes);
 
-    nn_GCN_dGRU_parallelFreq(trainPsd, valPsd, testPsd, settingsPsd, savingPath, isMacro)
-    nn_GCN_dGRU_parallelTime(trainTime, valTime, testTime, settingsTime, savingPath, isMacro)
+    [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'time','image');
+    nn_GCN_Time(numSubject, train, val, test, settings, savingPath, isMacro);
 
-    nn_GCN_dGRU_sequenceFreq(trainPsd, valPsd, testPsd, settingsPsd, savingPath, isMacro)
-    nn_GCN_dGRU_sequenceTime(trainTime, valTime, testTime, settingsTime, savingPath, isMacro)
-
-    nn_GCN_Freq(trainPsdImage, valPsdImage, testPsdImage, settingsPsd, savingPath, isMacro)
-    nn_GCN_Time(trainTimeImage, valTimeImage, testTimeImage, settingsTime, savingPath, isMacro)
-
-    LDA_RandomForest(trainFeatures, testFeatures, settingsFeatures, savingPath, isMacro)
+    
+    [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'features');
+    LDA_RandomForest(numSubject, train, test, settings, savingPath, isMacro);
     
 end
