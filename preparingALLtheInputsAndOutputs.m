@@ -13,54 +13,54 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
 
     % importings PSD -------------------------------------------------------------------------------
     if strcmpi(typeOfData,'psd')
-    disp(['importing and splitting the PSD of subject ',num2str(numSubject)])
-    filenamePSD = ['subj',num2str(numSubject),'_psd.mat'];
-    [Psd,settings] = startingTrain(filenamePSD,classes);
-
-    if strcmpi(typeOfInput,'sequence')
-    typeOfDataInput = 'sequence';
-    settings.movwinLength = 2*settings.windowLength; % [s]
-    settings.movwinShift = 2*settings.windowShift; % [s]
-    [train, val, test] = splittingData(Psd,settings,typeOfDataInput);
-    elseif strcmpi(typeOfInput,'image')
-    typeOfDataInput = 'image';
-    [train, val, test] = splittingData(Psd,settings,typeOfDataInput);
-    end
+        disp(['importing and splitting the PSD of subject ',num2str(numSubject)])
+        filenamePSD = ['subj',num2str(numSubject),'_psd.mat'];
+        [Psd,settings] = startingTrain(filenamePSD,classes);
+    
+        if strcmpi(typeOfInput,'sequence')
+            typeOfDataInput = 'sequence';
+            settings.movwinLength = 2*settings.windowLength; % [s]
+            settings.movwinShift = 2*settings.windowShift; % [s]
+            [train, val, test] = splittingData(Psd,settings,typeOfDataInput);
+        elseif strcmpi(typeOfInput,'image')
+            typeOfDataInput = 'image';
+            [train, val, test] = splittingData(Psd,settings,typeOfDataInput);
+        end
     end
     
     % importings time -------------------------------------------------------------------------------
     if strcmpi(typeOfData,'time')
-    disp(['importing and splitting the time series of subject ',num2str(numSubject)])
-    filenameTime = ['subj',num2str(numSubject),'_labeledRaw.mat'];
-    [timeSeries,settings] = startingTrain(filenameTime,classes);
-    fs = settings.eeg.fs;
-
-    [b,a] = butter(4,cutLowFreq/(fs/2),'high');
-    [d,c] = butter(4,cutHighFreq/(fs/2),'low');
-    for i = 1:settings.NumEEG
-        timeSeries.data(i,:) = filtfilt(b,a,double(timeSeries.data(i,:))); 
-        timeSeries.data(i,:) = filtfilt(d,c,double(timeSeries.data(i,:)));  
-    end
-
-    if strcmpi(typeOfInput,'sequence')
-    typeOfDataInput = 'sequence';
-    settings.windowShift = 1/fs;
-    settings.movwinLength = 1;
-    settings.movwinShift = 0.04; 
-    [train, val, test] = splittingData(timeSeries,settings,typeOfDataInput);
-    elseif strcmpi(typeOfInput,'image')
-    settings.windowShift = 1/fs;
-    typeOfDataInput = 'image';
-    [train, val, test] = splittingData(timeSeries,settings,typeOfDataInput);
-    end
+        disp(['importing and splitting the time series of subject ',num2str(numSubject)])
+        filenameTime = ['subj',num2str(numSubject),'_labeledRaw.mat'];
+        [timeSeries,settings] = startingTrain(filenameTime,classes);
+        fs = settings.eeg.fs;
+    
+        [b,a] = butter(4,cutLowFreq/(fs/2),'high');
+        [d,c] = butter(4,cutHighFreq/(fs/2),'low');
+        for i = 1:settings.NumEEG
+            timeSeries.data(i,:) = filtfilt(b,a,double(timeSeries.data(i,:))); 
+            timeSeries.data(i,:) = filtfilt(d,c,double(timeSeries.data(i,:)));  
+        end
+    
+        if strcmpi(typeOfInput,'sequence')
+            typeOfDataInput = 'sequence';
+            settings.windowShift = 1/fs;
+            settings.movwinLength = 1;
+            settings.movwinShift = 0.04; 
+            [train, val, test] = splittingData(timeSeries,settings,typeOfDataInput);
+        elseif strcmpi(typeOfInput,'image')
+            settings.windowShift = 1/fs;
+            typeOfDataInput = 'image';
+            [train, val, test] = splittingData(timeSeries,settings,typeOfDataInput);
+        end
     end
 
     % importings features -------------------------------------------------------------------------------
     if strcmpi(typeOfData,'features')
-    disp(['importing and splitting the features of subject ',num2str(numSubject)])
-    filenameFeat = ['subj',num2str(numSubject),'_featuresEMG.mat'];
-    [train,test,settings] = startingSplittingFeatures(filenameFeat,classes);
-    val = [];
+        disp(['importing and splitting the features of subject ',num2str(numSubject)])
+        filenameFeat = ['subj',num2str(numSubject),'_featuresEMG.mat'];
+        [train,test,settings] = startingSplittingFeatures(filenameFeat,classes);
+        val = [];
     end
 
 
