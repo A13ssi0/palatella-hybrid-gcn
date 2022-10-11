@@ -11,7 +11,7 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN_dGRU_
     
     disp(['Training GCN_dGRU_parallelFreq for subject ',num2str(subject)]);
      
-    [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_parallelFreq(settings, train.input, train.output, val.input, val.output,  test.input, test.output, isTime);
+    [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_parallel(settings, train.input, train.output, val.input, val.output,  test.input, test.output, isTime);
     
     if exist('savingPath','var')
         savingName = [savingPath,startingName,'subj',num2str(subject)];
@@ -21,7 +21,7 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN_dGRU_
 end
 
 
-function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_parallelFreq(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest, isTime)
+function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_parallel(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest, isTime)
 
    branchEMG = [
         functionLayer(@(X) slicing(X,settings.NumEEG+1,settings.NumEMG), 'Name','slicingEMG')

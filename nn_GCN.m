@@ -11,7 +11,7 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN(subje
     
     disp(['Training GCN_Time for subject ',num2str(subject)]);
      
-    [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_Time(settings, train.input, train.output, val.input, val.output,  test.input, test.output,isTime);
+    [net, info, confMatrix, class, pred, accuracyThresholds] = GCN(settings, train.input, train.output, val.input, val.output,  test.input, test.output,isTime);
     
     if exist('savingPath','var')
         savingName = [savingPath,startingName,'subj',num2str(subject)];
@@ -21,11 +21,11 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN(subje
 end
 
 
-function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_Time(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest,isTime)
+function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest,isTime)
     
     lgraph = [
         imageInputLayer(settings.inputSize,'Normalization','zscore','NormalizationDimension','element')
-        graphConvWithLearnStruct3Layer(settings.NumFeatures,settings.NumOutFeatures,settings.NumEMG,settings.NumEEG)
+        graphConvWithLearnStruct3LayerZeros(settings.NumFeatures,settings.NumOutFeatures,settings.NumEMG,settings.NumEEG)
         reluLayer
         batchNormalizationLayer
         dropoutLayer(settings.gcnDropOut,'Name','drop')

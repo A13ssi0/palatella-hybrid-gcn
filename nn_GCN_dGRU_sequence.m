@@ -11,7 +11,7 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN_dGRU_
     
     disp(['Training GCN_dGRU_sequenceFreq for subject ',num2str(subject)]);
      
-    [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_sequenceFreq(settings, train.input, train.output, val.input, val.output,  test.input, test.output, isTime);
+    [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_sequence(settings, train.input, train.output, val.input, val.output,  test.input, test.output, isTime);
     
     if exist('savingPath','var')
         savingName = [savingPath,startingName,'subj',num2str(subject)];
@@ -21,12 +21,12 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN_dGRU_
 end
 
 
-function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_sequenceFreq(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest,isTIme)
+function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_sequence(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest,isTIme)
 
     layers = [
         sequenceInputLayer(settings.inputSize,'Name','input','Normalization','zscore','NormalizationDimension','element')
         sequenceFoldingLayer('Name','fold')
-        graphConvWithLearnStruct3LayerZeros_fixedDiagonal(settings.NumFeatures,settings.NumOutFeatures,settings.NumEMG,settings.NumEEG,'Name','GConv')
+        graphConvWithLearnStruct3LayerZeros(settings.NumFeatures,settings.NumOutFeatures,settings.NumEMG,settings.NumEEG,'Name','GConv')
         reluLayer('Name','relu')
         batchNormalizationLayer
         dropoutLayer(settings.gcnDropOut,'Name','GcnDrop')
