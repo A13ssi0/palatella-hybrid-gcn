@@ -17,22 +17,26 @@ isMacro = doMacro;
 
 for numSubject = subjects
   %type of data, type of input  
+    isTime = false;
     [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'psd','sequence');
-    nn_GCN_dGRU_parallelFreq(numSubject, train, val, test, settings, savingPath, isMacro);
-    nn_GCN_dGRU_sequenceFreq(numSubject, train, val, test, settings, savingPath, isMacro);
+    nn_GCN_dGRU_parallel(numSubject, train, val, test, settings, savingPath, isTime, isMacro);
+    nn_GCN_dGRU_sequence(numSubject, train, val, test, settings, savingPath, isTIme, isMacro);
 
 
+    isTime = true;
     [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'time','sequence');
-    nn_GCN_dGRU_parallelTime(numSubject, train, val, test, settings, savingPath, isMacro);
-    nn_GCN_dGRU_sequenceTime(numSubject, train, val, test, settings, savingPath, isMacro);
+    nn_GCN_dGRU_parallel(numSubject, train, val, test, settings, savingPath, isTime, isMacro);
+    nn_GCN_dGRU_sequence(numSubject, train, val, test, settings, savingPath, isTime, isMacro);
 
 
+    isTime = false;
     [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'psd','image');
-    nn_GCN_Freq(numSubject, train, val, test, settings, savingPath, isMacro);
+    nn_GCN(numSubject, train, val, test, settings, savingPath, isTime, isMacro);
     
 
+    isTime = true;
     [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'time','image');
-    nn_GCN_Time(numSubject, train, val, test, settings, savingPath, isMacro);
+    nn_GCN(numSubject, train, val, test, settings, savingPath, isTime, isMacro);
 
     
     [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'features');
