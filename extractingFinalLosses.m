@@ -1,6 +1,7 @@
-function micro = extractingFinalLosses(freqRes, timeRes)
+function [micro, macro] = extractingFinalLosses(freqRes, timeRes, mlRes)
 
-micro = nan(1,12);
+micro = nan(1,14);
+macro = nan(1,14);
 
 % frequency
 micro(1) = freqRes.parallel.zeros.info.TrainingLoss(end);

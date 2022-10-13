@@ -10,6 +10,7 @@ else
     nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/settings.windowShift;
 end
 
+
 nTrial = length(outputTestSet)/nWindowsTrial;
 trialClasses = reshape(outputTestSet,nWindowsTrial,nTrial)';
 
@@ -27,11 +28,18 @@ isCorrectClass = nan(nTrial,nWindowsTrial);
 for i = 1:nTrial
     idx = (1:nWindowsTrial) + nWindowsTrial*(i-1);
     if ~isa(inputTestSet,'cell')
-        classification.classes(i,:) = classify(net, inputTestSet(:,:,:,idx));
-        isCorrectClass(i,:) = classification.classes(i,:)==trialClasses(i);
-    
-        prediction.perc(i,:,:) = predict(net, inputTestSet(:,:,:,idx));
-        prediction.cumul(i,:,:) = cumsum(prediction.perc(i,:,:));
+        if length(size(inputTestSet))==2
+            [classification.classes(i,:),prediction.perc(i,:,:),~] = predict(net, inputTestSet(idx,:));
+            isCorrectClass(i,:) = classification.classes(i,:)==categorical(trialClasses(i));
+        
+            prediction.cumul(i,:,:) = cumsum(prediction.perc(i,:,:));
+        else
+            classification.classes(i,:) = classify(net, inputTestSet(:,:,:,idx));
+            isCorrectClass(i,:) = classification.classes(i,:)==trialClasses(i);
+        
+            prediction.perc(i,:,:) = predict(net, inputTestSet(:,:,:,idx));
+            prediction.cumul(i,:,:) = cumsum(prediction.perc(i,:,:));
+        end
     else
         classification.classes(i,:) = classify(net, inputTestSet(idx));
         isCorrectClass(i,:) = classification.classes(i,:)==trialClasses(i);
@@ -44,6 +52,8 @@ end
 
 classification.accuracy = sum(isCorrectClass,'all')/numel(outputTestSet);
 disp(['Classification accuracy of: ', num2str(classification.accuracy)])
+
+if iscategorical(classification.classes), outputTestSet = categorical(outputTestSet); end
 
 confMatrix = confusionmat(outputTestSet,reshape(classification.classes', size(outputTestSet)));
 

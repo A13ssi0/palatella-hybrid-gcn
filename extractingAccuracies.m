@@ -51,7 +51,7 @@ macro(12) = accuracyMicroToMacro(timeRes.gcn.full.confMatrix);
 
 % machine learning
 micro(13) = mlRes.lda.class.accuracy;
-macro(13) = accuracyMicroToMacro(mlRes.lda.confMatrix);
+macro(13) = accuracyMicroToMacro(mlRes.lda.LDAconfMatrix);
 
 micro(14) = mlRes.randFor.class.accuracy;
-macro(14) = accuracyMicroToMacro(mlRes.randFor.confMatrix);
+macro(14) = accuracyMicroToMacro(mlRes.randFor.RFconfMatrix);

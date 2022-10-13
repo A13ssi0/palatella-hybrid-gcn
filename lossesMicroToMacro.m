@@ -1,0 +1,2 @@
+function losses = lossesMicroToMacro(strcModel)
+
