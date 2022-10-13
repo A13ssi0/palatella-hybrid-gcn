@@ -21,7 +21,7 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN_dGRU_
 end
 
 
-function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_sequence_fxdD(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest,isTIme)
+function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_sequence_fxdD(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest,isTime)
 
     layers = [
         sequenceInputLayer(settings.inputSize,'Name','input','Normalization','zscore','NormalizationDimension','element')

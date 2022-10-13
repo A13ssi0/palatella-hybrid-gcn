@@ -31,7 +31,7 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
     % importings time -------------------------------------------------------------------------------
     if strcmpi(typeOfData,'time')
         disp(['importing and splitting the time series of subject ',num2str(numSubject)])
-        filenameTime = ['subj',num2str(numSubject),'_labeledRaw.mat'];
+        filenameTime = ['subj',num2str(numSubject),'_labeled.mat'];
         [timeSeries,settings] = startingTrain(filenameTime,classes);
         fs = settings.eeg.fs;
     

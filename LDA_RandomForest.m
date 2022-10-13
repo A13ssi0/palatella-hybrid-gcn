@@ -1,5 +1,7 @@
 function [LDAModel, confMatrixLDA, forestModel, confMatrixRF] = LDA_RandomForest(subject,train,test,settings,savingPath,isMacro)
 
+    trueTestOutput = test.output;
+
     % LDA
     disp(['Training LDA for subject ',num2str(subject)]);
 
@@ -15,8 +17,8 @@ function [LDAModel, confMatrixLDA, forestModel, confMatrixRF] = LDA_RandomForest
 
     settings.typeOfMLmodel = startingNameLDA;
     if exist('savingPath','var')
-        savingName = [savingPath,startingNameLDA,'subj',num2str(subject)];
-        save(savingName,'LDAModel','settings','confMatrixLDA');
+        savingName = [savingPath,startingNameLDA,'subj',num2str(subject),'_noRaw'];
+        save(savingName,'LDAModel','settings','trueTestOutput','confMatrixLDA');
     end
 
 
@@ -36,8 +38,8 @@ function [LDAModel, confMatrixLDA, forestModel, confMatrixRF] = LDA_RandomForest
 
     settings.typeOfMLmodel = startingNameRF;
     if exist('savingPath','var')
-        savingName = [savingPath,startingNameRF,'subj',num2str(subject)];
-        save(savingName,'forestModel','settings','confMatrixRF');
+        savingName = [savingPath,startingNameRF,'subj',num2str(subject),'_noRaw'];
+        save(savingName,'forestModel','settings','trueTestOutput','confMatrixRF');
     end
 
 

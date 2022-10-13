@@ -1,6 +1,6 @@
 close all; clearvars; clc;
 
-subject = 19;
+subject = 15;
 
 filename = ['subj',num2str(subject),'_pruned.mat'];
 load(filename)
@@ -8,10 +8,10 @@ load(filename)
 savingPath='/home/palatella/workspace/palatella_datasets/';
 
 %%
-% h_EMG = hilbert(subj.emg.data);
-% h_EMG = abs(h_EMG);
+h_EMG = hilbert(subj.emg.data);
+h_EMG = abs(h_EMG);
 
-h_EMG = subj.emg.data;
+%h_EMG = subj.emg.data;
 
 triggers = subj.triggers;
 data = [subj.eeg.data; h_EMG];
@@ -56,6 +56,6 @@ subjLabeled.data = data;
 subjLabeled.triggers = triggers;
 subjLabeled.settings = settings;
 %% SAVING
-savingName = [savingPath,'subj',num2str(subject),'_labeledRaw.mat'];
+savingName = [savingPath,'subj',num2str(subject),'_labeled.mat'];
 save(savingName,'subjLabeled','-v7.3')
 

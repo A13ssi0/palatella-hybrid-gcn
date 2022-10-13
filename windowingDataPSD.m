@@ -1,6 +1,6 @@
 close all; clearvars; clc;
 
-subject = 23;
+subject = 15;
 
 savingPath='/home/palatella/workspace/palatella_datasets/';
 disp('importing the data')

@@ -13,9 +13,10 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN_dGRU_
      
     [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_parallel_fullAdj(settings, train.input, train.output, val.input, val.output,  test.input, test.output, isTime);
     
+    trueTestOutput = test.output;
     if exist('savingPath','var')
-        savingName = [savingPath,startingName,'subj',num2str(subject)];
-        save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
+        savingName = [savingPath,startingName,'subj',num2str(subject),'_noRaw'];
+        save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','trueTestOutput','-v7.3');
     end
 
 end

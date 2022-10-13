@@ -3,7 +3,7 @@ close all; clearvars; clc;
 
 savingPath = '/home/palatella/workspace/palatella_datasets/'; 
 
-subject = 13;
+subject = 15;
 sessions = [1 2 3];
 
 secStartStop = 10;
@@ -189,19 +189,19 @@ subj.settings.doneICA = 'yes';
 save(savingName, 'subj','-v7.3');
 
 %% IC selection
-% savingName = [savingPath,'subj',num2str(subject),'_pruned.mat'];
-% 
+savingName = [savingPath,'subj',num2str(subject),'_pruned.mat'];
+
 EEG1 = compute_extractepochs(subj);
 EEG1.icaact = geticaact(EEG1);
 EEG1 = iclabel(EEG1);
 [art_comps] = ADJUST(EEG1,'report.txt');
 pop_viewprops(EEG1, 0);
-% % 
-% subj.eeg.icaact = geticaact(subj.eeg);
-% prompt = 'Enter the components to remove:\n';
-% rm_comps = (str2num(input(prompt, "s")))';
-% subj.eeg = pop_subcomp(subj.eeg,rm_comps);
-% save(savingName, 'subj','-v7.3')
+% 
+subj.eeg.icaact = geticaact(subj.eeg);
+prompt = 'Enter the components to remove:\n';
+rm_comps = (str2num(input(prompt, "s")))';
+subj.eeg = pop_subcomp(subj.eeg,rm_comps);
+save(savingName, 'subj','-v7.3')
 %   save(sprintf(savingName, subj,'-v7.3'));
 
 

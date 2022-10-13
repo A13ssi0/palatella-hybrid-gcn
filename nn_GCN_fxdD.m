@@ -53,13 +53,13 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_fxdD(set
     [net, info] = trainNetwork(inputTrain, outputTrain, lgraph, options);
     
     % Prediction and confusion matrix
-    if isTime
-         [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings, [], settings.movwinLength);
-         accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings, [], [], settings.movwinLength);
-    else
+%     if isTime
+%          [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings, [], settings.movwinLength);
+%          accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings, [], [], settings.movwinLength);
+%     else
         [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings);
         accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings, []);
-    end
+%     end
 end
 
 
