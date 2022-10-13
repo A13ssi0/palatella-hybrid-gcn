@@ -50,8 +50,8 @@ macro(12) = { confMatrixMicroToMacro(timeRes.gcn.full.confMatrix) } ;
 
 
 % machine learning
-micro(13) = { mlRes.lda.confMatrix } ;
-macro(13) = { confMatrixMicroToMacro(mlRes.lda.confMatrix) } ;
+micro(13) = { mlRes.lda.confMatrixLDA } ;
+macro(13) = { confMatrixMicroToMacro(mlRes.lda.confMatrixLDA) } ;
 
-micro(14) = { mlRes.randFor.confMatrix } ;
-macro(14) = { confMatrixMicroToMacro(mlRes.randFor.confMatrix) } ;
+micro(14) = { mlRes.randFor.confMatrixRF } ;
+macro(14) = { confMatrixMicroToMacro(mlRes.randFor.confMatrixRF) } ;

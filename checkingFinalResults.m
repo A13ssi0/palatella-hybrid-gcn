@@ -24,8 +24,13 @@ for subj = subjects
     lossMicro(1,:) = extractingFinalLosses(freqRes, timeRes);
     [confMatrices.micro(i,:), confMatrices.macro(i,:)] = extractingConfusionMatrices(freqRes, timeRes, mlRes);
     timeAccuracies(i,:,:) = extractingTimeAccuracies(freqRes, timeRes, mlRes)'; 
-    adjacencyMatrices(1,:) = extractingAdjacencyMatrices(freqRes, timeRes);
+    %adjacencyMatrices(1,:) = extractingAdjacencyMatrices(freqRes, timeRes);
         
 end
 
+%%
+acc.micro = mean(accuracies.micro);
+acc.macro = mean(accuracies.macro);
+sdAcc.micro = sd(accuracies.micro);
+sdAcc.macro = sd(accuracies.macro);
 
