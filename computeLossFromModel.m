@@ -2,11 +2,13 @@ function loss = computeLossFromModel(model)
 
 predClasses = model.class.classes';
 
-predClasses = predClasses(:);
-trueClasses = model.trueTestOutput;
+predClasses = double(predClasses(:));
+trueClasses = model.trueTestOutput';
 
-oneHotTrueClass = oneHotEncodingClasses(trueClasses);
-oneHotPredClass = oneHotEncodingClasses(predClasses);
+if size(trueClasses,1)==1,  trueClasses = trueClasses'; end
+
+oneHotTrueClass = onehotencode(trueClasses,2,'ClassNames',unique(trueClasses));
+oneHotPredClass = onehotencode(predClasses,2,'ClassNames',unique(trueClasses));
 
 loss = crossentropy(oneHotPredClass,oneHotTrueClass);
 

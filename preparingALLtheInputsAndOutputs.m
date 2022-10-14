@@ -9,8 +9,6 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
     cutHighFreq = 30;
 
 
-
-
     % importings PSD -------------------------------------------------------------------------------
     if strcmpi(typeOfData,'psd')
         disp(['importing and splitting the PSD of subject ',num2str(numSubject)])
