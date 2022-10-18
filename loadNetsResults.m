@@ -1,6 +1,6 @@
 function [netsFreqResults, netsTimeResults, machineLearningResults] = loadNetsResults(subject)
 
-loadingPath='/home/palatella/workspace/palatella_net/results_run/';
+loadingPath='\Users\aless\OneDrive\Desktop\Tesi\codes\git_repo\final nets\';
 
 %% Loading Parallel nets
 loadingName = 'nn_GCN_dGRU_parallelTime';

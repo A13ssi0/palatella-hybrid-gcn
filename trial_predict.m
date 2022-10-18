@@ -1,4 +1,8 @@
-function [confMatrix, classification, prediction] = trial_predict(net, inputTestSet, outputTestSet, settings, doPlots, windowSeconds)
+function [confMatrix, classification, prediction] = trial_predict(net, inputTestSet, outputTestSet, settings, doPlots, windowSeconds, isML)
+
+if ~exist('isML','var')  || isempty(isML)
+    isML = false;
+end
 
 if ~exist('doPlots','var')  || isempty(doPlots)
     doPlots = false;
