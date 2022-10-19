@@ -1,7 +1,8 @@
-function [confMatrix, classification, prediction] = trial_predict(net, inputTestSet, outputTestSet, settings, doPlots, windowSeconds, isML)
+function [confMatrix, classification, prediction] = trial_predict(net, inputTestSet, outputTestSet, settings, doPlots, isFitPosterior, windowSeconds)
 
-if ~exist('isML','var')  || isempty(isML)
-    isML = false;
+disp('Trial predicting')
+if ~exist('isFitPosterior','var')
+    isFitPosterior = false;
 end
 
 if ~exist('doPlots','var')  || isempty(doPlots)
@@ -33,9 +34,12 @@ for i = 1:nTrial
     idx = (1:nWindowsTrial) + nWindowsTrial*(i-1);
     if ~isa(inputTestSet,'cell')
         if length(size(inputTestSet))==2
-            [classification.classes(i,:),prediction.perc(i,:,:),~] = predict(net, inputTestSet(idx,:));
+            if isFitPosterior
+                [classification.classes(i,:),~,~,prediction.perc(i,:,:)] = predict(net, inputTestSet(idx,:)); 
+            else
+                [classification.classes(i,:),prediction.perc(i,:,:),~] = predict(net, inputTestSet(idx,:));       
+            end
             isCorrectClass(i,:) = classification.classes(i,:)==categorical(trialClasses(i));
-        
             prediction.cumul(i,:,:) = cumsum(prediction.perc(i,:,:));
         else
             classification.classes(i,:) = classify(net, inputTestSet(:,:,:,idx));
