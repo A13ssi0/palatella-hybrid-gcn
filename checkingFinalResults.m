@@ -1,6 +1,6 @@
 close all; clearvars; clc;
 
-subjects = [7 11 15 19 23]; %13, 7 11 19 23
+subjects = [7 11 15 19 23]; 
 
 %%
 accuracies.micro = nan(length(subjects),14);
@@ -43,15 +43,15 @@ loss.macro = mean(losses.macro);
 sdLoss.micro = std(losses.micro);
 sdLoss.macro = std(losses.macro);
 
-medAcc.micro = median(accuracies.micro);
-medAcc.macro = median(accuracies.macro);
-sdMedAcc.micro = mad(accuracies.micro);
-sdMedAcc.macro = mad(accuracies.macro);
-
-medLoss.micro = median(losses.micro);
-medLoss.macro = median(losses.macro);
-sdMedLoss.micro = mad(losses.micro);
-sdMedLoss.macro = mad(losses.macro);
+% medAcc.micro = median(accuracies.micro);
+% medAcc.macro = median(accuracies.macro);
+% sdMedAcc.micro = mad(accuracies.micro);
+% sdMedAcc.macro = mad(accuracies.macro);
+% 
+% medLoss.micro = median(losses.micro);
+% medLoss.macro = median(losses.macro);
+% sdMedLoss.micro = mad(losses.micro);
+% sdMedLoss.macro = mad(losses.macro);
 
 
 maxPoint = 100;
@@ -75,20 +75,20 @@ scaleAcc = 100;
 barPlot(scaleAcc*acc.micro,'Mean Accuracy','All classes',scaleAcc*sdAcc.micro);
 barPlot(scaleAcc*acc.macro,'Mean Accuracy','Macro classes',scaleAcc*sdAcc.macro,scaleAcc*[0 1]);
 
-barPlot(scaleAcc*medAcc.micro,'Median Accuracy','All classes',scaleAcc*sdMedAcc.micro);
-barPlot(scaleAcc*medAcc.macro,'Median Accuracy','Macro classes',scaleAcc*sdMedAcc.macro,scaleAcc*[0 1]);
+% barPlot(scaleAcc*medAcc.micro,'Median Accuracy','All classes',scaleAcc*sdMedAcc.micro);
+% barPlot(scaleAcc*medAcc.macro,'Median Accuracy','Macro classes',scaleAcc*sdMedAcc.macro,scaleAcc*[0 1]);
 
 
-lossMaxMicro = max([loss.micro+sdLoss.micro,medLoss.micro+sdMedLoss.micro],[],'all');
-lossMaxMacro = max([loss.macro+sdLoss.macro,medLoss.macro+sdMedLoss.macro],[],'all');
-lossMinMicro = min([loss.micro-sdLoss.micro,medLoss.micro-sdMedLoss.micro],[],'all');
-lossMinMacro = min([loss.macro-sdLoss.macro,medLoss.macro-sdMedLoss.macro],[],'all');
+% lossMaxMicro = max([loss.micro+sdLoss.micro,medLoss.micro+sdMedLoss.micro],[],'all');
+% lossMaxMacro = max([loss.macro+sdLoss.macro,medLoss.macro+sdMedLoss.macro],[],'all');
+% lossMinMicro = min([loss.micro-sdLoss.micro,medLoss.micro-sdMedLoss.micro],[],'all');
+% lossMinMacro = min([loss.macro-sdLoss.macro,medLoss.macro-sdMedLoss.macro],[],'all');
 
-barPlot(loss.micro,'Final Mean Loss','All classes',sdLoss.micro,[lossMinMicro lossMaxMicro]);
-barPlot(loss.macro,'Final Mean Loss','Macro classes',sdLoss.macro,[lossMinMacro lossMaxMacro]);
+barPlot(loss.micro,'Final Mean Loss','All classes',sdLoss.micro);%,[lossMinMicro lossMaxMicro]);
+barPlot(loss.macro,'Final Mean Loss','Macro classes',sdLoss.macro);%,[lossMinMacro lossMaxMacro]);
 
-barPlot(medLoss.micro,'Final Median Loss','All classes',sdMedLoss.micro,[lossMinMicro lossMaxMicro]);
-barPlot(medLoss.macro,'Final MedianLoss','Macro classes',sdMedLoss.macro,[lossMinMacro lossMaxMacro]);
+% barPlot(medLoss.micro,'Final Median Loss','All classes',sdMedLoss.micro,[lossMinMicro lossMaxMicro]);
+% barPlot(medLoss.macro,'Final MedianLoss','Macro classes',sdMedLoss.macro,[lossMinMacro lossMaxMacro]);
 
 
 %%
