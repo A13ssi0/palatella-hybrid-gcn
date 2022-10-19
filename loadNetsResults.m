@@ -74,7 +74,7 @@ loadingName = [loadingPath,loadingName,'subj',num2str(subject),'_noRaw'];
 machineLearningResults.lda = load(loadingName);
 
 loadingName = 'RandomForest';
-loadingName = [loadingPath,loadingName,'subj',num2str(subject),'_noRaw'];
+loadingName = [loadingPath,loadingName,'subj',num2str(subject),'_noRaw_Fitposterior'];
 machineLearningResults.randFor = load(loadingName);
 
 
