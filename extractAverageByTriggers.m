@@ -2,12 +2,12 @@ close all; clearvars; clc;
 
 subjects = [7 11 15 19 23]; 
 
+doHilbert = true;
 %%
 nTriggers = 0;
 for sbj = subjects
 
-    data = divideDataByTriggers(sbj);
-    max(data,[],'all')
+    data = divideDataByTriggers(sbj, doHilbert);
     nTriggers = nTriggers + size(data,3);
 
     if ~exist('timeAverage','var'), timeAverage = zeros(size(data,1,2)); end
@@ -18,7 +18,7 @@ end
 
 timeAverage = timeAverage/nTriggers;
 
-
+save timeCourseTriggerAverageHilbert.mat  timeAverage
 %%
 % secPre = 0.5;
 % secPost = 2;

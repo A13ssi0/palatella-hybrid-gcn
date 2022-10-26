@@ -4,6 +4,10 @@ if ~exist('doPlot','var') || isempty(doPlot)
     doPlot = false;
 end
 
+if ~exist('th_seconds','var') 
+    th_seconds = [];
+end
+
 if ~isempty(th_seconds) && th_seconds<settings.windowShift
     error(['Threshold is before the first window end. It must be more or equal to ',num2str(settings.windowShift),' seconds']);
 end

@@ -1,7 +1,8 @@
 function [confMatrix, classification, prediction] = trial_predict(net, inputTestSet, outputTestSet, settings, doPlots, isFitPosterior, windowSeconds)
 
 disp('Trial predicting')
-if ~exist('isFitPosterior','var')
+
+if ~exist('isFitPosterior','var') || isempty(isFitPosterior)
     isFitPosterior = false;
 end
 

@@ -1,4 +1,4 @@
-function dividedData = divideDataByTriggers(subj)
+function dividedData = divideDataByTriggers(subj, doHilbert)
 
 
 secPre = 0.5;
@@ -9,7 +9,14 @@ disp(['importing the data subject ',num2str(subj)])
 filename = ['subj',num2str(subj),'_pruned.mat'];
 load(filename)
 
-emg = subj.emg.data;
+if doHilbert
+    emg = hilbert(subj.emg.data');
+    emg = abs(emg');
+else 
+    emg = subj.emg.data;
+end
+
+
 fc = subj.emg.srate;
 triggersTime = subj.triggers.time;
 

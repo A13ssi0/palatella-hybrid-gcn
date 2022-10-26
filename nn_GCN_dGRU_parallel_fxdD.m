@@ -13,9 +13,10 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN_dGRU_
      
     [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_parallel_fxdD(settings, train.input, train.output, val.input, val.output,  test.input, test.output, isTime);
     
+    trueTestOutput = test.output;
     if exist('savingPath','var')
         savingName = [savingPath,startingName,'subj',num2str(subject)];
-        save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','-v7.3');
+        save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','trueTestOutput','-v7.3');
     end
 
 end
@@ -90,11 +91,11 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_par
     
     % Prediction and confusion matrix
     if isTime
-         [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings, [], settings.movwinLength);
+         [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings, [], [], settings.movwinLength);
          accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings, [], [], settings.movwinLength);
     else
         [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings);
-        accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings, []);
+        accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings);
     end
 
 end

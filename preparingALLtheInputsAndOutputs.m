@@ -12,7 +12,8 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
     % importings PSD -------------------------------------------------------------------------------
     if strcmpi(typeOfData,'psd')
         disp(['importing and splitting the PSD of subject ',num2str(numSubject)])
-        filenamePSD = ['subj',num2str(numSubject),'_psd.mat'];
+        %filenamePSD = ['subj',num2str(numSubject),'_psd_corrected.mat'];
+        filenamePSD = ['subj',num2str(numSubject),'_psd_corrected.mat'];
         [Psd,settings] = startingTrain(filenamePSD,classes);
     
         if strcmpi(typeOfInput,'sequence')
@@ -29,7 +30,7 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
     % importings time -------------------------------------------------------------------------------
     if strcmpi(typeOfData,'time')
         disp(['importing and splitting the time series of subject ',num2str(numSubject)])
-        filenameTime = ['subj',num2str(numSubject),'_labeled.mat'];
+        filenameTime = ['subj',num2str(numSubject),'_labeledRaw.mat'];
         [timeSeries,settings] = startingTrain(filenameTime,classes);
         fs = settings.eeg.fs;
     

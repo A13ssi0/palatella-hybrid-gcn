@@ -85,11 +85,11 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_seq
     
     % Prediction and confusion matrix
     if isTime
-         [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings, [], settings.movwinLength);
+         [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings, [], [], settings.movwinLength);
          accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings, [], [], settings.movwinLength);
     else
         [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings);
-        accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings, []);
+        accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings);
     end
 end
 
