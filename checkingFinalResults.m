@@ -2,20 +2,22 @@ close all; clearvars; clc;
 
 subjects = [7 11 15 19 23]; 
 
+load timeCourseTriggerAverageHilbert.mat
+
 %%
-accuracies.micro = nan(length(subjects),14);
-accuracies.macro = nan(length(subjects),14);
+accuracies.micro = nan(length(subjects),20);
+accuracies.macro = nan(length(subjects),20);
 
-losses.micro = nan(length(subjects),14);
-losses.macro = nan(length(subjects),14);
+losses.micro = nan(length(subjects),20);
+losses.macro = nan(length(subjects),20);
 
-confMatrices.micro = cell(length(subjects),14);
-confMatrices.macro = cell(length(subjects),14);
+confMatrices.micro = cell(length(subjects),20);
+confMatrices.macro = cell(length(subjects),20);
 
-timeAccuracies.micro = cell(length(subjects),14);
-timeAccuracies.macro = cell(length(subjects),14);
+timeAccuracies.micro = cell(length(subjects),20);
+timeAccuracies.macro = cell(length(subjects),20);
 
-adjacencyMatrices = nan(length(subjects),14);
+adjacencyMatrices = nan(length(subjects),20);
 
 i = 1;
 for subj = subjects
@@ -32,36 +34,39 @@ for subj = subjects
     i = i+1;
 end
 
+accuracies = correctData(accuracies);
+losses = correctData(losses);
+confMatrices = correctData(confMatrices);
+timeAccuracies = correctData(timeAccuracies);
+
+j = isnan(losses.micro);
+j(:,3:3:18) = 0;
+accuracies.micro(j) = nan;
+
 %%
-acc.micro = mean(accuracies.micro);
-acc.macro = mean(accuracies.macro);
-sdAcc.micro = std(accuracies.micro);
-sdAcc.macro = std(accuracies.macro);
+acc.micro = mean(accuracies.micro,'omitnan');
+acc.macro = mean(accuracies.macro,'omitnan');
+sdAcc.micro = std(accuracies.micro,'omitnan');
+sdAcc.macro = std(accuracies.macro,'omitnan');
 
-loss.micro = mean(losses.micro);
-loss.macro = mean(losses.macro);
-sdLoss.micro = std(losses.micro);
-sdLoss.macro = std(losses.macro);
-
-% medAcc.micro = median(accuracies.micro);
-% medAcc.macro = median(accuracies.macro);
-% sdMedAcc.micro = mad(accuracies.micro);
-% sdMedAcc.macro = mad(accuracies.macro);
-% 
-% medLoss.micro = median(losses.micro);
-% medLoss.macro = median(losses.macro);
-% sdMedLoss.micro = mad(losses.micro);
-% sdMedLoss.macro = mad(losses.macro);
-
+loss.micro = mean(losses.micro,'omitnan');
+loss.macro = mean(losses.macro,'omitnan');
+sdLoss.micro = std(losses.micro,'omitnan');
+sdLoss.macro = std(losses.macro,'omitnan');
 
 maxPoint = 100;
-tmpTimeAccMicro = nan(5,14,maxPoint);
-tmpTimeAccMacro = nan(5,14,maxPoint);
-for i = 1:14
-    valDownSample = length(timeAccuracies.macro{1,i})/maxPoint;
-    for j = 1:5
-        tmpTimeAccMacro(j,i,:) = downsample(timeAccuracies.macro{j,i},valDownSample);
+tmpTimeAccMicro = nan(5,20,maxPoint);
+tmpTimeAccMacro = nan(5,20,maxPoint);
+for i = 1:size(tmpTimeAccMicro,2)
+    valDownSample = length(timeAccuracies.micro{1,i})/maxPoint;
+    for j = 1:size(tmpTimeAccMicro,1)
         tmpTimeAccMicro(j,i,:)  = downsample(timeAccuracies.micro{j,i},valDownSample);
+    end
+    valDownSample = length(timeAccuracies.macro{1,i})/maxPoint;
+    if valDownSample >0 
+    for j = 1:size(tmpTimeAccMacro,1)
+        tmpTimeAccMacro(j,i,:) = downsample(timeAccuracies.macro{j,i},valDownSample);
+    end
     end
 end
 avTimeAcc.micro = squeeze(mean(tmpTimeAccMicro))';
@@ -75,25 +80,13 @@ scaleAcc = 100;
 barPlot(scaleAcc*acc.micro,'Mean Accuracy','All classes',scaleAcc*sdAcc.micro);
 barPlot(scaleAcc*acc.macro,'Mean Accuracy','Macro classes',scaleAcc*sdAcc.macro,scaleAcc*[0 1]);
 
-% barPlot(scaleAcc*medAcc.micro,'Median Accuracy','All classes',scaleAcc*sdMedAcc.micro);
-% barPlot(scaleAcc*medAcc.macro,'Median Accuracy','Macro classes',scaleAcc*sdMedAcc.macro,scaleAcc*[0 1]);
-
-
-% lossMaxMicro = max([loss.micro+sdLoss.micro,medLoss.micro+sdMedLoss.micro],[],'all');
-% lossMaxMacro = max([loss.macro+sdLoss.macro,medLoss.macro+sdMedLoss.macro],[],'all');
-% lossMinMicro = min([loss.micro-sdLoss.micro,medLoss.micro-sdMedLoss.micro],[],'all');
-% lossMinMacro = min([loss.macro-sdLoss.macro,medLoss.macro-sdMedLoss.macro],[],'all');
-
-barPlot(loss.micro,'Final Mean Loss','All classes',sdLoss.micro);%,[lossMinMicro lossMaxMicro]);
-barPlot(loss.macro,'Final Mean Loss','Macro classes',sdLoss.macro);%,[lossMinMacro lossMaxMacro]);
-
-% barPlot(medLoss.micro,'Final Median Loss','All classes',sdMedLoss.micro,[lossMinMicro lossMaxMicro]);
-% barPlot(medLoss.macro,'Final MedianLoss','Macro classes',sdMedLoss.macro,[lossMinMacro lossMaxMacro]);
+barPlot(loss.micro,'Final Mean Loss','All classes',sdLoss.micro);
+barPlot(loss.macro,'Final Mean Loss','Macro classes',sdLoss.macro);
 
 
 %%
 plotTimeAccuracies(avTimeAcc.micro,'all classes');
-plotTimeAccuracies(avTimeAcc.macro,'macro classes');
+%plotTimeAccuracies(avTimeAcc.macro,'macro classes');
 
 
 %%
@@ -109,52 +102,98 @@ load chanlocs64.mat
 plot_ch_idx = fidx(eeg_labels,{chanlocs.labels});
 
 
-
+subjects = 7;
 Atmp = zeros(41);
 loadingPath='\Users\aless\OneDrive\Desktop\Tesi\codes\git_repo\final nets\';
-loadingNameStart = 'nn_GCN_dGRU_sequence_fullAdjFreq_';
+loadingNameStart = 'nn_GCN_dGRU_parallel_fullAdjTime';
 for sbj = subjects
     loadingName = [loadingPath,loadingNameStart,'subj',num2str(sbj),'_noRaw'];
     net = load(loadingName);
     net = net.net;
     
     settings.NumChannels = 41;
-    Wa = double(net.Layers(3).Wa);
+    %Wa = double(net.Layers(3).Wa);
+    Wa = double(net.Layers(7).Wa);
     Aui = triu(ones(settings.NumChannels));
     Al = tril(ones(settings.NumChannels),-1);
     A = Aui;
     A(A>0) = Wa;
     A = A + Al.*A';
-    Atmp = Atmp + normAdjacency(A);
+    A = normAdjacency(A);
+    Atmp = Atmp + A;
     % Atmp(end-size(Wa,1)+1:end,1:size(Wa,2)) = A(end-size(Wa,1)+1:end,1:size(Wa,2)).*Wa;
     % Atmp(1:size(Wa,2),end-size(Wa,1)+1:end) = A(1:size(Wa,2),end-size(Wa,1)+1:end).*(Wa)';
 end
-Atmp = Atmp/5;
+Atmp = Atmp/length(subjects);
+
+% subjects = 7;
+% Atmp = zeros(41);
+% loadingPath='\Users\aless\OneDrive\Desktop\Tesi\codes\git_repo\final nets\';
+% loadingNameStart = 'nn_GCN_dGRU_parallel_fxdDTime';
+% for sbj = subjects
+%     loadingName = [loadingPath,loadingNameStart,'subj',num2str(sbj)];
+%     net = load(loadingName);
+%     net = net.net;
+%     
+%     settings.NumChannels = 41;
+%     Wa = double(net.Layers(7).Wa);
+%     A = extractdata(net.Layers(7).A);
+%     A(end-size(Wa,1)+1:end,1:size(Wa,2)) = A(end-size(Wa,1)+1:end,1:size(Wa,2)).*Wa;
+%     A(1:size(Wa,2),end-size(Wa,1)+1:end) = A(1:size(Wa,2),end-size(Wa,1)+1:end).*(Wa)';
+% 
+%     %A = normAdjacency(A);
+%     Atmp = Atmp + A;
+% end
+% Atmp = Atmp/length(subjects);
+
+val = 0.6;
+limits = [-val val];
 
 
-
+xName = cell(41,1);
+for i = 1:41
+    xName(i) = {['N',num2str(i)]};
+end
 figure
-imagesc(Atmp,[-0.2 0.2])
+imagesc(Atmp,limits)
 xticks(1:size(A,1))
-xticklabels(cat(2,eeg_labels,emg_labels))
+xticklabels(xName)
 yticks(1:size(A,1))
 yticklabels(cat(2,eeg_labels,emg_labels))
 colormap(my_colormap(2))
 colorbar
 
 
-figure
-ha = tight_subplot(2,length(emg_labels)/2,[0.001 0.001],[0.01 0.1],[0.05 0.05]);
-for m = 1:length(emg_labels)
-    axes(ha(m));
+% figure
+% ha = tight_subplot(2,length(emg_labels)/2,[0.001 0.001],[0.01 0.1],[0.05 0.05]);
+% for m = 1:length(emg_labels)
+%     axes(ha(m));
+% 
+%     y_plt = zeros(length(chanlocs),1);
+%     y_plt(plot_ch_idx) = Atmp(length(ch35)+m,1:length(ch35));
+% 
+%     topoplot(y_plt, chanlocs, 'maplimits', limits, 'electrodes', 'off');
+%     title(emg_labels{m},'FontSize',14);
+% end
 
-    y_plt = zeros(length(chanlocs),1);
-    y_plt(plot_ch_idx) = Atmp(length(ch35)+m,1:length(ch35));
+%%
+x = 0.02:0.02:2;
+xEMG = -0.5:1/500:2;
+%emgMax = max(abs(timeAverage),[],'all');
 
-    topoplot(y_plt, chanlocs, 'maplimits', [-0.2 0.2], 'electrodes', 'off');
-    title(emg_labels{m},'FontSize',14);
+figure()
+subplot(8,1,[1,2]),
+plot(x,avTimeAcc.micro(:,2))
+hold on
+set(gca,'TickLength',[0 0],'FontWeight','bold')
+xlim([-0.5 2])
+ylabel('Avg Acc')
+for i = 3:8
+    subplot(8,1,i), plot(xEMG, timeAverage(i-2,:))
+    xlim([-0.5 2])
+    %ylim([-emgMax emgMax])
+    ylabel(['Ch',num2str(i-2)])
+    set(gca,'TickLength',[0 0],'FontWeight','bold')
 end
-
-
-
+xlabel('time [s]')
 
