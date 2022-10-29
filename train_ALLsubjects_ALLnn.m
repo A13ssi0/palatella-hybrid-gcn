@@ -5,7 +5,7 @@ subjects = [7 11 15 19 23]; %7
 
 doMacro = false;
 
-savingPath='/home/palatella/workspace/palatella_net/results_run/fixedDiagonal/';
+savingPath='/home/palatella/workspace/palatella_net/results_run/fullAdjFxdDiagonal/';
 
 
 %%
@@ -30,7 +30,7 @@ for numSubject = subjects
     [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'psd','image');
 %     nn_GCN(numSubject, train, val, test, settings, savingPath, isTime, isMacro);
 %     nn_GCN_fullAdj(numSubject, train, val, test, settings, savingPath, isTime, isMacro);
-   nn_GCN_fxdD(numSubject, train, val, test, settings, savingPath, isTime, isMacro);
+    nn_GCN_fxdD(numSubject, train, val, test, settings, savingPath, isTime, isMacro);
 
 % % 
     isTime = true;

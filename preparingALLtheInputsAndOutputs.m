@@ -20,9 +20,12 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
             typeOfDataInput = 'sequence';
             settings.movwinLength = 2*settings.windowLength; % [s]
             settings.movwinShift = 2*settings.windowShift; % [s]
+            settings.nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/settings.movwinShift;
             [train, val, test] = splittingData(Psd,settings,typeOfDataInput);
         elseif strcmpi(typeOfInput,'image')
             typeOfDataInput = 'image';
+            %fs = settings.eeg.fs;
+            settings.nWindowsTrial = 1;
             [train, val, test] = splittingData(Psd,settings,typeOfDataInput);
         end
     end
@@ -46,9 +49,11 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
             settings.windowShift = 1/fs;
             settings.movwinLength = 1;
             settings.movwinShift = 0.04; 
+            settings.nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/settings.movwinShift;
             [train, val, test] = splittingData(timeSeries,settings,typeOfDataInput);
         elseif strcmpi(typeOfInput,'image')
-            settings.windowShift = 1/fs;
+            %settings.windowShift = 1/fs;
+            settings.nWindowsTrial = 1;
             typeOfDataInput = 'image';
             [train, val, test] = splittingData(timeSeries,settings,typeOfDataInput);
         end

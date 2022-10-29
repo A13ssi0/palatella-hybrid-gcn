@@ -16,12 +16,13 @@ if ~isempty(th_seconds) && mod(th_seconds,settings.windowShift) >0
     warning('Threshold is not an integer number of windows. Rounded towards zero')
 end
 
-if exist('windowSeconds','var')
-    nWindowsTrial = windowSeconds/settings.windowShift;
-else
-    nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/settings.windowShift;
-end
-
+nWindowsTrial = size(predictionCumul,2);
+% if exist('windowSeconds','var')
+%     nWindowsTrial = windowSeconds/settings.windowShift;
+% else
+%     nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/0.04; %settings.mowwinShift
+% end
+% if length(size(inputTestSet))==4,   nWindowsTrial = 1; end
 nTrial = length(outputTestSet)/nWindowsTrial;
 trialClasses = reshape(outputTestSet,nWindowsTrial,nTrial)';
 

@@ -26,7 +26,7 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_fxdD(set
     
     lgraph = [
         imageInputLayer(settings.inputSize,'Normalization','zscore','NormalizationDimension','element')
-        graphConvWithLearnStruct3LayerZeros_fixedDiagonal(settings.NumFeatures,settings.NumOutFeatures,settings.NumEMG,settings.NumEEG)
+        graphConvWithLearnStruct3Layer_fixedDiagonal(settings.NumFeatures,settings.NumOutFeatures,settings.NumEMG,settings.NumEEG)
         reluLayer
         batchNormalizationLayer
         dropoutLayer(settings.gcnDropOut,'Name','drop')

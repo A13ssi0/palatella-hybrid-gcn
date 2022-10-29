@@ -5,6 +5,7 @@ classdef graphConvWithLearnStruct3Layer_fixedDiagonal < nnet.layer.Layer
     properties
         Aui
         Al
+        EyeA
     end
        
     properties (Learnable)
@@ -31,6 +32,7 @@ classdef graphConvWithLearnStruct3Layer_fixedDiagonal < nnet.layer.Layer
 
             layer.Aui = triu(ones(totalChannel))-eye(totalChannel);
             layer.Al = tril(ones(totalChannel),-1);
+            layer.EyeA = eye(totalChannel);
 
             layer.W = rand([numFeatures numOut]);
 %             layer.Wi = eye(totalChannel);
@@ -82,7 +84,7 @@ classdef graphConvWithLearnStruct3Layer_fixedDiagonal < nnet.layer.Layer
 %             Atmp = layer.A.*(layer.Wa + layer.Wa' + layer.Wi);
             A = layer.Aui;
             A(A>0) = layer.Wa;
-            A = A + layer.Al.*A' + eye(totalChannel);
+            A = A + layer.Al.*A' + layer.EyeA;
             
             A = dlarray(A);
 

@@ -35,7 +35,7 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_par
     layers = [
         sequenceInputLayer(settings.inputSize,'Name','input','Normalization','zscore','NormalizationDimension','element')
         sequenceFoldingLayer('Name','fold')
-        graphConvWithLearnStruct3LayerZeros_fixedDiagonal(settings.NumFeatures,settings.NumOutFeatures,settings.NumEMG,settings.NumEEG,'Name','GConv')
+        graphConvWithLearnStruct3Layer_fixedDiagonal(settings.NumFeatures,settings.NumOutFeatures,settings.NumEMG,settings.NumEEG,'Name','GConv')
         reluLayer('Name','relu')
         batchNormalizationLayer
         dropoutLayer(settings.gcnDropOut,'Name','GcnDrop')
