@@ -28,9 +28,9 @@ if strcmpi(type,'sequence')
                 onsetNum = [onsetNum; 0 i];
         end
     end
-elseif strcmpi(type,'image')
-    onsetNum = num;
-end
+ elseif strcmpi(type,'image')
+     onsetNum = num;
+ end
 
 %disp('creating new windows label')
 

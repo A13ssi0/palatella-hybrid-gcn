@@ -9,13 +9,13 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN_dGRU_
 
     if isMacro,     startingName = [startingName, 'macro_'];   end
     
-    disp(['Training GCN_dGRU_sequence_fxdDFreq for subject ',num2str(subject)]);
+    disp(['Training GCN_dGRU_sequence_fxdDfullAdjFreq for subject ',num2str(subject)]);
      
     [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_sequence_fxdD(settings, train.input, train.output, val.input, val.output,  test.input, test.output, isTime);
     
         trueTestOutput = test.output;
     if exist('savingPath','var')
-        savingName = [savingPath,startingName,'subj',num2str(subject)];
+        savingName = [savingPath,startingName,'subj',num2str(subject),'_IncorrectHilbert'];
         save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','trueTestOutput','-v7.3');
     end
 

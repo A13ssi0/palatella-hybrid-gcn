@@ -10,14 +10,20 @@ if ~exist('doPlots','var')  || isempty(doPlots)
     doPlots = false;
 end
 
-nWindowsTrial = settings.nWindowsTrial;
+%nWindowsTrial = settings.nWindowsTrial;
 if exist('windowSeconds','var')
     nWindowsTrial = windowSeconds/settings.windowShift;
 else
     nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/0.04; %settings.mowwinShift
 end
 
-if length(size(inputTestSet))==4,   nWindowsTrial = 1; end
+if length(size(inputTestSet))==4
+    if size(inputTestSet,2) == 1
+        nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)*1000; 
+    else
+        nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/0.02; 
+    end
+end
 
 nTrial = length(outputTestSet)/nWindowsTrial;
 trialClasses = reshape(outputTestSet,nWindowsTrial,nTrial)';

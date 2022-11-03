@@ -13,7 +13,7 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
     if strcmpi(typeOfData,'psd')
         disp(['importing and splitting the PSD of subject ',num2str(numSubject)])
         %filenamePSD = ['subj',num2str(numSubject),'_psd_corrected.mat'];
-        filenamePSD = ['subj',num2str(numSubject),'_psd_corrected.mat'];
+        filenamePSD = ['subj',num2str(numSubject),'_psd.mat'];
         [Psd,settings] = startingTrain(filenamePSD,classes);
     
         if strcmpi(typeOfInput,'sequence')
@@ -24,8 +24,11 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
             [train, val, test] = splittingData(Psd,settings,typeOfDataInput);
         elseif strcmpi(typeOfInput,'image')
             typeOfDataInput = 'image';
-            %fs = settings.eeg.fs;
-            settings.nWindowsTrial = 1;
+%             fs = settings.eeg.fs;
+%             settings.windowShift = 1/fs;
+%             %settings.nWindowsTrial = 1;
+%             settings.movwinLength = (settings.secPostMovement+settings.secPreMovement);
+%             settings.movwinShift = settings.windowShift;
             [train, val, test] = splittingData(Psd,settings,typeOfDataInput);
         end
     end
@@ -33,7 +36,7 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
     % importings time -------------------------------------------------------------------------------
     if strcmpi(typeOfData,'time')
         disp(['importing and splitting the time series of subject ',num2str(numSubject)])
-        filenameTime = ['subj',num2str(numSubject),'_labeledRaw.mat'];
+        filenameTime = ['subj',num2str(numSubject),'_labeled_corrected.mat'];
         [timeSeries,settings] = startingTrain(filenameTime,classes);
         fs = settings.eeg.fs;
     
@@ -52,8 +55,8 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
             settings.nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/settings.movwinShift;
             [train, val, test] = splittingData(timeSeries,settings,typeOfDataInput);
         elseif strcmpi(typeOfInput,'image')
-            %settings.windowShift = 1/fs;
-            settings.nWindowsTrial = 1;
+            settings.windowShift = 1/fs;
+            %settings.nWindowsTrial = 1;
             typeOfDataInput = 'image';
             [train, val, test] = splittingData(timeSeries,settings,typeOfDataInput);
         end

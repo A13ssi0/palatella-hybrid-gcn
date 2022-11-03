@@ -15,7 +15,7 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_GCN(subje
     
     trueTestOutput = test.output;
     if exist('savingPath','var')
-        savingName = [savingPath,startingName,'subj',num2str(subject),'_noRaw'];
+        savingName = [savingPath,startingName,'subj',num2str(subject),'_CheckRaw'];
         save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','trueTestOutput','-v7.3');
     end
 
