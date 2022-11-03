@@ -5,19 +5,19 @@ subjects = [7 11 15 19 23];
 load timeCourseTriggerAverageHilbert.mat
 
 %%
-accuracies.micro = nan(length(subjects),20);
-accuracies.macro = nan(length(subjects),20);
+accuracies.micro = nan(length(subjects),26);
+accuracies.macro = nan(length(subjects),26);
 
-losses.micro = nan(length(subjects),20);
-losses.macro = nan(length(subjects),20);
+losses.micro = nan(length(subjects),26);
+losses.macro = nan(length(subjects),26);
 
-confMatrices.micro = cell(length(subjects),20);
-confMatrices.macro = cell(length(subjects),20);
+confMatrices.micro = cell(length(subjects),26);
+confMatrices.macro = cell(length(subjects),26);
 
-timeAccuracies.micro = cell(length(subjects),20);
-timeAccuracies.macro = cell(length(subjects),20);
+timeAccuracies.micro = cell(length(subjects),26);
+timeAccuracies.macro = cell(length(subjects),26);
 
-adjacencyMatrices = nan(length(subjects),20);
+adjacencyMatrices = nan(length(subjects),26);
 
 i = 1;
 for subj = subjects
@@ -40,7 +40,6 @@ confMatrices = correctData(confMatrices);
 timeAccuracies = correctData(timeAccuracies);
 
 j = isnan(losses.micro);
-j(:,3:3:18) = 0;
 accuracies.micro(j) = nan;
 
 %%
@@ -54,19 +53,17 @@ loss.macro = mean(losses.macro,'omitnan');
 sdLoss.micro = std(losses.micro,'omitnan');
 sdLoss.macro = std(losses.macro,'omitnan');
 
-maxPoint = 100;
-tmpTimeAccMicro = nan(5,20,maxPoint);
-tmpTimeAccMacro = nan(5,20,maxPoint);
-for i = 1:size(tmpTimeAccMicro,2)
+maxPoint = 50;
+tmpTimeAccMicro = nan(5,26,maxPoint);
+tmpTimeAccMacro = nan(5,26,maxPoint);
+for i = 1:26
     valDownSample = length(timeAccuracies.micro{1,i})/maxPoint;
+    if valDownSample<1, valDownSample = 1; end
     for j = 1:size(tmpTimeAccMicro,1)
         tmpTimeAccMicro(j,i,:)  = downsample(timeAccuracies.micro{j,i},valDownSample);
-    end
-    valDownSample = length(timeAccuracies.macro{1,i})/maxPoint;
-    if valDownSample >0 
-    for j = 1:size(tmpTimeAccMacro,1)
-        tmpTimeAccMacro(j,i,:) = downsample(timeAccuracies.macro{j,i},valDownSample);
-    end
+        if ~isempty(timeAccuracies.macro{j,i})
+            tmpTimeAccMacro(j,i,:) = downsample(timeAccuracies.macro{j,i},valDownSample);
+        end
     end
 end
 avTimeAcc.micro = squeeze(mean(tmpTimeAccMicro))';
@@ -77,16 +74,76 @@ sdTimeAcc.macro = squeeze(std(tmpTimeAccMacro))';
 
 %% 
 scaleAcc = 100;
-barPlot(scaleAcc*acc.micro,'Mean Accuracy','All classes',scaleAcc*sdAcc.micro);
-barPlot(scaleAcc*acc.macro,'Mean Accuracy','Macro classes',scaleAcc*sdAcc.macro,scaleAcc*[0 1]);
+maxAcc = 1.05*max(acc.micro+sdAcc.micro,[],'all');
+barPlot(scaleAcc*acc.micro,'Mean Accuracy','Accuracy - All classes',scaleAcc*sdAcc.micro,scaleAcc*[0 maxAcc]);
+barPlot(scaleAcc*acc.macro,'Mean Accuracy','Accuracy - Macro classes',scaleAcc*sdAcc.macro,scaleAcc*[0 1]);
 
-barPlot(loss.micro,'Final Mean Loss','All classes',sdLoss.micro);
-barPlot(loss.macro,'Final Mean Loss','Macro classes',sdLoss.macro);
+maxLossMicro = 1.05*max(loss.micro+sdLoss.micro,[],'all');
+maxLossMacro = 1.05*max(loss.macro+sdLoss.macro,[],'all');
+barPlot(loss.micro,'Mean Loss','Final loss - All classes',sdLoss.micro,[0 maxLossMicro]);
+barPlot(loss.macro,'Mean Loss','Final loss - Macro classes',sdLoss.macro,[0 maxLossMacro]);
 
 
 %%
 plotTimeAccuracies(avTimeAcc.micro,'all classes');
 %plotTimeAccuracies(avTimeAcc.macro,'macro classes');
+
+%%
+[~,bestNet] = max(max(avTimeAcc.micro));
+
+tmpTimeAverage = timeAverage;
+valMin = min(tmpTimeAverage,[],2);
+valMax = max(tmpTimeAverage-valMin,[],2);
+[mx,idx] = max(valMax);
+valOnset = mx*0.15;
+
+x = 0.04:0.04:2;
+xx = 0.04:1/500:2;
+xEMG = -0.45:1/500:2;
+
+maxDelay = 0.3;
+addIdxDelay = 0.3*500;
+
+avTimeInterp = linterp(x,avTimeAcc.micro(:,bestNet),xx);
+
+idxOnsetEMG = find(tmpTimeAverage(idx,:)-valMin(idx,:)>=valOnset,1,'first');
+idxOnsetAcc = find(xx==xEMG(idxOnsetEMG));
+
+start = round((-0.45+0.5)*500+1);
+figure()
+subplot(8,1,[1,2]),
+plot(xx,100*avTimeInterp)
+ytickformat("percentage")
+title('Best Accuracy and hilbert EMGs')
+hold on
+xline(xx(idxOnsetAcc))
+xline(xx(idxOnsetAcc+addIdxDelay),'--')
+set(gca,'TickLength',[0 0],'FontWeight','bold')
+xlim([xEMG(1) xEMG(end)])
+ylim([min(100*avTimeInterp)*0.95 max(100*avTimeInterp)*1.05])
+ylabel('Avg Acc')
+for i = 3:8
+    subplot(8,1,i), plot(xEMG, timeAverage(i-2,start:end))
+    xlim([xEMG(1) xEMG(end)])
+    xline(xEMG(idxOnsetEMG))
+    xline(xEMG(idxOnsetEMG+addIdxDelay),'--')
+    ylabel(['Ch',num2str(i-2)])
+    set(gca,'TickLength',[0 0],'FontWeight','bold')
+end
+xlabel('Time [s]')
+
+%% CONFUSION MATRIX AT CERTAIN TIME
+idxEvalutation = find(x>=xEMG(idxOnsetEMG+addIdxDelay),1,'first');
+
+loadingPath='\Users\aless\OneDrive\Desktop\Tesi\codes\git_repo\final nets\';
+loadingName = 'nn_GCN_dGRU_sequence_fxdDTime_';
+loadingName = [loadingPath,'fullAdjFxdDiagonal\',loadingName,'subj'];
+
+sbjc = [7 11 15 19 23];
+confusionMatrix = calcConfMatrix(loadingName,idxEvalutation,sbjc);
+
+figure()
+confusionchart(confusionMatrix,'ColumnSummary','absolute','RowSummary','absolute','Normalization','row-normalized');
 
 
 %%
@@ -102,60 +159,42 @@ load chanlocs64.mat
 plot_ch_idx = fidx(eeg_labels,{chanlocs.labels});
 
 
-subjects = 7;
-Atmp = zeros(41);
-loadingPath='\Users\aless\OneDrive\Desktop\Tesi\codes\git_repo\final nets\';
-loadingNameStart = 'nn_GCN_dGRU_parallel_fullAdjTime';
-for sbj = subjects
-    loadingName = [loadingPath,loadingNameStart,'subj',num2str(sbj),'_noRaw'];
-    net = load(loadingName);
-    net = net.net;
-    
-    settings.NumChannels = 41;
-    %Wa = double(net.Layers(3).Wa);
-    Wa = double(net.Layers(7).Wa);
-    Aui = triu(ones(settings.NumChannels));
-    Al = tril(ones(settings.NumChannels),-1);
-    A = Aui;
-    A(A>0) = Wa;
-    A = A + Al.*A';
-    A = normAdjacency(A);
-    Atmp = Atmp + A;
-    % Atmp(end-size(Wa,1)+1:end,1:size(Wa,2)) = A(end-size(Wa,1)+1:end,1:size(Wa,2)).*Wa;
-    % Atmp(1:size(Wa,2),end-size(Wa,1)+1:end) = A(1:size(Wa,2),end-size(Wa,1)+1:end).*(Wa)';
-end
-Atmp = Atmp/length(subjects);
-
 % subjects = 7;
 % Atmp = zeros(41);
 % loadingPath='\Users\aless\OneDrive\Desktop\Tesi\codes\git_repo\final nets\';
-% loadingNameStart = 'nn_GCN_dGRU_parallel_fxdDTime';
+% loadingNameStart = 'nn_GCN_dGRU_parallel_fullAdjTime';
 % for sbj = subjects
-%     loadingName = [loadingPath,loadingNameStart,'subj',num2str(sbj)];
-%     net = load(loadingName);
-%     net = net.net;
-%     
-%     settings.NumChannels = 41;
-%     Wa = double(net.Layers(7).Wa);
-%     A = extractdata(net.Layers(7).A);
-%     A(end-size(Wa,1)+1:end,1:size(Wa,2)) = A(end-size(Wa,1)+1:end,1:size(Wa,2)).*Wa;
-%     A(1:size(Wa,2),end-size(Wa,1)+1:end) = A(1:size(Wa,2),end-size(Wa,1)+1:end).*(Wa)';
-% 
-%     %A = normAdjacency(A);
-%     Atmp = Atmp + A;
+%     loadingName = [loadingPath,loadingNameStart,'subj',num2str(sbj),'_noRaw'];
+%     AdjMatrix = extractAdjMatrix(loadingName);
 % end
 % Atmp = Atmp/length(subjects);
 
-val = 0.6;
-limits = [-val val];
+subjects = 7;
+Atmp = zeros(41);
+loadingPath='\Users\aless\OneDrive\Desktop\Tesi\codes\git_repo\final nets\';
+loadingNameStart = 'nn_GCN_dGRU_sequence_fxdDTime_';
+for sbj = subjects
+    %loadingName = [loadingPath,loadingNameStart,'subj',num2str(sbj)];
+    loadingName = [loadingPath,'fullAdjFxdDiagonal\',loadingNameStart,'subj',num2str(sbj)];
+    Atmp = extractAdjMatrix(loadingName);
+end
+Atmp = Atmp/length(subjects);
 
+
+
+k = max(A-EyeA,[],'all');
+l = min(A-EyeA,[],'all');
+lol = max(k,abs(l))*1.25;
+val = 0.6;
+val = lol;
+limits = [-val val];
 
 xName = cell(41,1);
 for i = 1:41
     xName(i) = {['N',num2str(i)]};
 end
 figure
-imagesc(Atmp,limits)
+imagesc(Atmp)%,limits)
 xticks(1:size(A,1))
 xticklabels(xName)
 yticks(1:size(A,1))
@@ -176,24 +215,6 @@ colorbar
 %     title(emg_labels{m},'FontSize',14);
 % end
 
-%%
-x = 0.02:0.02:2;
-xEMG = -0.5:1/500:2;
-%emgMax = max(abs(timeAverage),[],'all');
 
-figure()
-subplot(8,1,[1,2]),
-plot(x,avTimeAcc.micro(:,2))
-hold on
-set(gca,'TickLength',[0 0],'FontWeight','bold')
-xlim([-0.5 2])
-ylabel('Avg Acc')
-for i = 3:8
-    subplot(8,1,i), plot(xEMG, timeAverage(i-2,:))
-    xlim([-0.5 2])
-    %ylim([-emgMax emgMax])
-    ylabel(['Ch',num2str(i-2)])
-    set(gca,'TickLength',[0 0],'FontWeight','bold')
-end
-xlabel('time [s]')
+
 

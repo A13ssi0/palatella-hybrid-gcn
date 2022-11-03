@@ -1,7 +1,7 @@
 function [micro, macro] = extractingAccuracies(freqRes, timeRes, mlRes)
 
-micro = nan(1,20);
-macro = nan(1,20);
+micro = nan(1,26);
+macro = nan(1,26);
 
 % frequency
 micro(1) = freqRes.parallel.zeros.class.accuracy;
@@ -65,3 +65,25 @@ macro(19) = accuracyMicroToMacro(mlRes.lda.LDAconfMatrix);
 
 micro(20) = mlRes.randFor.class.accuracy;
 macro(20) = accuracyMicroToMacro(mlRes.randFor.RFconfMatrix);
+
+% extra
+micro(21) = freqRes.parallel.fullFxd.class.accuracy;
+macro(21) = accuracyMicroToMacro(freqRes.parallel.fullFxd.confMatrix);
+
+micro(22) = freqRes.sequence.fullFxd.class.accuracy;
+macro(22) = accuracyMicroToMacro(freqRes.sequence.fullFxd.confMatrix);
+
+micro(23) = freqRes.gcn.fullFxd.class.accuracy;
+macro(23) = accuracyMicroToMacro(freqRes.gcn.fullFxd.confMatrix);
+
+micro(24) = timeRes.parallel.fullFxd.class.accuracy;
+macro(24) = accuracyMicroToMacro(timeRes.parallel.fullFxd.confMatrix);
+
+micro(25) = timeRes.sequence.fullFxd.class.accuracy;
+macro(25) = accuracyMicroToMacro(timeRes.sequence.fullFxd.confMatrix);
+
+micro(26) = timeRes.gcn.fullFxd.class.accuracy;
+macro(26) = accuracyMicroToMacro(timeRes.gcn.fullFxd.confMatrix);
+
+
+

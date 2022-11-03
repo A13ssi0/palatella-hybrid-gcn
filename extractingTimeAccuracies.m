@@ -1,67 +1,86 @@
 function [micro, macro] = extractingTimeAccuracies(freqRes, timeRes, mlRes)
 
-micro = cell(1,20);
-macro = cell(1,20);
+micro = cell(1,26);
+macro = cell(1,26);
 
 % frequency
-micro(1) = {freqRes.parallel.zeros.accuracyThresholds};
-macro(1) = {timeAccuracyMicroToMacro(freqRes.parallel.zeros)};
+micro(1) = {correctTimeAccuracies(freqRes.parallel.zeros)};
+%macro(1) = {timeAccuracyMicroTo%macro(freqRes.parallel.zeros)};
 
-micro(2) = {freqRes.parallel.full.accuracyThresholds};
-macro(2) = {timeAccuracyMicroToMacro(freqRes.parallel.full)};
+micro(2) = {correctTimeAccuracies(freqRes.parallel.full)};
+%macro(2) = {timeAccuracyMicroTo%macro(freqRes.parallel.full)};
 
-micro(3) = {freqRes.parallel.fxd.accuracyThresholds};
-%macro(3) = {timeAccuracyMicroToMacro(freqRes.parallel.fxd)};
+micro(3) = {correctTimeAccuracies(freqRes.parallel.fxd)};
+%%macro(3) = {timeAccuracyMicroTo%macro(freqRes.parallel.fxd)};
 
-micro(4) = {freqRes.sequence.zeros.accuracyThresholds};
-macro(4) = {timeAccuracyMicroToMacro(freqRes.sequence.zeros)};
+micro(4) = {correctTimeAccuracies(freqRes.sequence.zeros)};
+%macro(4) = {timeAccuracyMicroTo%macro(freqRes.sequence.zeros)};
 
-micro(5) = {freqRes.sequence.full.accuracyThresholds};
-macro(5) = {timeAccuracyMicroToMacro(freqRes.sequence.full)};
+micro(5) = {correctTimeAccuracies(freqRes.sequence.full)};
+%macro(5) = {timeAccuracyMicroTo%macro(freqRes.sequence.full)};
 
-micro(6) = {freqRes.sequence.fxd.accuracyThresholds};
-%macro(6) = {timeAccuracyMicroToMacro(freqRes.sequence.fxd)};
+micro(6) = {correctTimeAccuracies(freqRes.sequence.fxd)};
+%%macro(6) = {timeAccuracyMicroTo%macro(freqRes.sequence.fxd)};
 
-micro(7) = {freqRes.gcn.zeros.accuracyThresholds};
-macro(7) = {timeAccuracyMicroToMacro(freqRes.gcn.zeros)};
+micro(7) = {(freqRes.gcn.zeros.accuracyThresholds)};
+%macro(7) = {timeAccuracyMicroTo%macro(freqRes.gcn.zeros)};
 
-micro(8) = {freqRes.gcn.full.accuracyThresholds};
-macro(8) = {timeAccuracyMicroToMacro(freqRes.gcn.full)};
+micro(8) = {(freqRes.gcn.full.accuracyThresholds)};
+%macro(8) = {timeAccuracyMicroTo%macro(freqRes.gcn.full)};
 
-micro(9) = {freqRes.gcn.fxd.accuracyThresholds};
-%macro(9) = {timeAccuracyMicroToMacro(freqRes.gcn.fxd)};
+micro(9) = {(freqRes.gcn.fxd.accuracyThresholds)};
+%%macro(9) = {timeAccuracyMicroTo%macro(freqRes.gcn.fxd)};
 
 % time
-micro(10) = {timeRes.parallel.zeros.accuracyThresholds};
-macro(10) = {timeAccuracyMicroToMacro(timeRes.parallel.zeros)};
+micro(10) = {correctTimeAccuracies(timeRes.parallel.zeros)};
+%macro(10) = {timeAccuracyMicroTo%macro(timeRes.parallel.zeros)};
 
-micro(11) = {timeRes.parallel.full.accuracyThresholds};
-macro(11) = {timeAccuracyMicroToMacro(timeRes.parallel.full)};
+micro(11) = {correctTimeAccuracies(timeRes.parallel.full)};
+%macro(11) = {timeAccuracyMicroTo%macro(timeRes.parallel.full)};
 
-micro(12) = {timeRes.parallel.fxd.accuracyThresholds};
-%macro(12) = {timeAccuracyMicroToMacro(timeRes.parallel.fxd)};
+micro(12) = {correctTimeAccuracies(timeRes.parallel.fxd)};
+%%macro(12) = {timeAccuracyMicroTo%macro(timeRes.parallel.fxd)};
 
-micro(13) = {timeRes.sequence.zeros.accuracyThresholds};
-macro(13) = {timeAccuracyMicroToMacro(timeRes.sequence.zeros)};
+micro(13) = {correctTimeAccuracies(timeRes.sequence.zeros)};
+%macro(13) = {timeAccuracyMicroTo%macro(timeRes.sequence.zeros)};
 
-micro(14) = {timeRes.sequence.full.accuracyThresholds};
-macro(14) = {timeAccuracyMicroToMacro(timeRes.sequence.full)};
+micro(14) = {correctTimeAccuracies(timeRes.sequence.full)};
+%macro(14) = {timeAccuracyMicroTo%macro(timeRes.sequence.full)};
 
-micro(15) = {timeRes.sequence.fxd.accuracyThresholds};
-%macro(15) = {timeAccuracyMicroToMacro(timeRes.sequence.fxd)};
+micro(15) = {correctTimeAccuracies(timeRes.sequence.fxd)};
+%%macro(15) = {timeAccuracyMicroTo%macro(timeRes.sequence.fxd)};
 
 micro(16) = {timeRes.gcn.zeros.accuracyThresholds};
-macro(16) = {timeAccuracyMicroToMacro(timeRes.gcn.zeros)};
+%macro(16) = {timeAccuracyMicroTo%macro(timeRes.gcn.zeros)};
 
 micro(17) = {timeRes.gcn.full.accuracyThresholds};
-macro(17) = {timeAccuracyMicroToMacro(timeRes.gcn.full)};
+%macro(17) = {timeAccuracyMicroTo%macro(timeRes.gcn.full)};
 
-micro(18) = {timeRes.gcn.fxd.accuracyThresholds};
-%macro(18) = {timeAccuracyMicroToMacro(timeRes.gcn.fxd)};
+micro(18) = {correctTimeAccuracies(timeRes.gcn.fxd)};
+%%macro(18) = {timeAccuracyMicroTo%macro(timeRes.gcn.fxd)};
 
 % machine learning
-micro(19) = {mlRes.lda.accuracyThresholds};
-macro(19) = {timeAccuracyMicroToMacro(mlRes.lda)};
+micro(19) = {correctTimeAccuracies(mlRes.lda)};
+%macro(19) = {timeAccuracyMicroTo%macro(mlRes.lda)};
 
-micro(20) = {mlRes.randFor.accuracyThresholds};
-macro(20) = {timeAccuracyMicroToMacro(mlRes.randFor)};
+micro(20) = {correctTimeAccuracies(mlRes.randFor)};
+%macro(20) = {timeAccuracyMicroTo%macro(mlRes.randFor)};
+
+% extra
+micro(21) = {freqRes.parallel.fullFxd.accuracyThresholds};
+%macro(21) = {timeAccuracyMicroTo%macro(freqRes.parallel.fullFxd)};
+
+micro(22) = {freqRes.sequence.fullFxd.accuracyThresholds};
+%macro(22) = {timeAccuracyMicroTo%macro(freqRes.sequence.fullFxd)};
+
+micro(23) = {freqRes.gcn.fullFxd.accuracyThresholds};
+%macro(23) = {timeAccuracyMicroTo%macro(freqRes.gcn.fullFxd)};
+
+micro(24) = {correctTimeAccuracies(timeRes.parallel.fullFxd)};
+%macro(24) = {timeAccuracyMicroTo%macro(timeRes.parallel.fullFxd)};
+
+micro(25) = {correctTimeAccuracies(timeRes.sequence.fullFxd)};
+%macro(25) = {timeAccuracyMicroTo%macro(timeRes.sequence.fullFxd)};
+
+micro(26) = {timeRes.gcn.fullFxd.accuracyThresholds};
+%macro(26) = {timeAccuracyMicroTo%macro(timeRes.gcn.fullFxd)};

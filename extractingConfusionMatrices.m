@@ -1,6 +1,6 @@
 function [micro, macro] = extractingConfusionMatrices(freqRes, timeRes, mlRes)
-micro = cell(1,20);
-macro = cell(1,20);
+micro = cell(1,26);
+macro = cell(1,26);
 
 % frequency
 micro(1) = {freqRes.parallel.zeros.confMatrix};
@@ -64,3 +64,22 @@ macro(19) = {confMatrixMicroToMacro(mlRes.lda.LDAconfMatrix)};
 
 micro(20) = {mlRes.randFor.RFconfMatrix};
 macro(20) = {confMatrixMicroToMacro(mlRes.randFor.RFconfMatrix)};
+
+% extra
+micro(21) = {freqRes.parallel.fullFxd.confMatrix};
+macro(21) = {confMatrixMicroToMacro(freqRes.parallel.fullFxd.confMatrix)};
+
+micro(22) = {freqRes.sequence.fullFxd.confMatrix};
+macro(22) = {confMatrixMicroToMacro(freqRes.sequence.fullFxd.confMatrix)};
+
+micro(23) = {freqRes.gcn.fullFxd.confMatrix};
+macro(23) = {confMatrixMicroToMacro(freqRes.gcn.fullFxd.confMatrix)};
+
+micro(24) = {timeRes.parallel.fullFxd.confMatrix};
+macro(24) = {confMatrixMicroToMacro(timeRes.parallel.fullFxd.confMatrix)};
+
+micro(25) = {timeRes.sequence.fullFxd.confMatrix};
+macro(25) = {confMatrixMicroToMacro(timeRes.sequence.fullFxd.confMatrix)};
+
+micro(26) = {timeRes.gcn.fullFxd.confMatrix};
+macro(26) = {confMatrixMicroToMacro(timeRes.gcn.fullFxd.confMatrix)};
