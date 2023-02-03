@@ -9,6 +9,7 @@ loadingName = [loadingPath,loadingName,'subj',num2str(subject),'_noRaw'];
 netsTimeResults.parallel.zeros = load(loadingName);
 loadingName = 'nn_GCN_dGRU_parallel_fullAdjTime';
 loadingName = [loadingPath,loadingName,'subj',num2str(subject),'_noRaw'];
+%loadingName = [loadingPath,'channelWiseHilbert\',loadingName,'subj',num2str(subject),'_noRaw'];
 netsTimeResults.parallel.full = load(loadingName);
 loadingName = 'nn_GCN_dGRU_parallel_fxdDTime';
 loadingName = [loadingPath,loadingName,'subj',num2str(subject)];
@@ -56,8 +57,10 @@ netsFreqResults.sequence.full = load(loadingName);
 loadingName = 'nn_GCN_dGRU_sequence_fxdDFreq_';
 loadingName = [loadingPath,loadingName,'subj',num2str(subject)];
 netsFreqResults.sequence.fxd = load(loadingName);
-loadingName = 'nn_GCN_dGRU_sequence_fxdDFreq_';
-loadingName = [loadingPath,'fullAdjFxdDiagonal\',loadingName,'subj',num2str(subject)];
+%loadingName = 'nn_GCN_dGRU_sequence_fxdDFreq_';
+%loadingName = [loadingPath,'fullAdjFxdDiagonal\',loadingName,'subj',num2str(subject)];
+loadingName = 'nn_GCN_dGRU_sequence_fxdDfullAdj_Freq_';
+loadingName = [loadingPath,'channelWiseHilbert\',loadingName,'subj',num2str(subject),'_IncorrectHilbert'];
 netsFreqResults.sequence.fullFxd = load(loadingName);
 
 %% Load only GCN nets

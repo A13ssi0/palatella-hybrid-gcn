@@ -2,8 +2,8 @@ function [trainFeatures,testFeatures,settings] = startingSplittingFeatures(filen
 
 load(filename)
 
-settings.movwinLength = settings.windowLength; % [s]
-settings.movwinShift = settings.windowShift; % [s]
+settings.movWinLength = settings.windowLength; % [s]
+settings.movWinShift = settings.windowShift; % [s]
 
 if ~exist('classes','var') || isempty(classes)
     windowsLabel(windowsLabel>=1 & windowsLabel<=2) = 1;

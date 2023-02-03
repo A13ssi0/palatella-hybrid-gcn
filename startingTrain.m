@@ -30,14 +30,15 @@ end
 windowsNum = data.triggers.num;
 windowsLabel = data.windowsLabel;
 
+
 %% Settings
 settings.fractTrain = 0.6;
 %settings.fractVal = 0.20;
 settings.fractVal = 0;
 settings.fractTest = 1 - settings.fractTrain - settings.fractVal;
 
-%%
 
+%%
 settings.inputSize = [settings.NumChannels, settings.NumFeatures, 1];
 
 if doMacroDividing
@@ -53,17 +54,6 @@ else
 end
 
 if takeRest, settings.classes = [0 settings.classes]; end
-
-
-% idxZeros = find(windowsLabel==0);
-% idxStartZeroTrial = [idxZeros(1); idxZeros(find(diff(idxZeros)>1)+1)];
-% 
-% secNothing = 0.5;
-% secZeros = 2;
-% idxEndNewZero = idxStartZeroTrial-secNothing/settings.windowShift;
-% 
-% windowsLabel(idxZeros) = nan;
-% windowsLabel([-secZeros/settings.windowShift:0]+idxEndNewZero) = 0;
 
 
 settings.numClasses = length(settings.classes);

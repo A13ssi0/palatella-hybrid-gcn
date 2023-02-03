@@ -21,8 +21,8 @@ barFigure(dataTime, yname, ['Time domain'], sdTime, yLim)
 subplot(122)
 barFigure(dataFreq, yname, ['Frequency domain'], sdTime, yLim)
 lgd = legend(legendNames,'location','northeast');%,orientation,'horizontal');
-lgd.Position(1) = 0.382;
-lgd.Position(2) = 0.79;
+% lgd.Position(1) = 0.382;
+% lgd.Position(2) = 0.79;
 lgd.FontWeight = 'normal';
 sgtitle(titleName)
 
