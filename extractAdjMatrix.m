@@ -1,4 +1,4 @@
-function AdjMatrix = extractAdjMatrix(loadingName)
+function [AdjMatrix,EyeA] = extractAdjMatrix(loadingName, isFixedDiagonal)
 
 if contains(loadingName,'parallel')
 
@@ -9,12 +9,15 @@ if contains(loadingName,'parallel')
     Wa = double(net.Layers(7).Wa);
     Aui = triu(ones(settings.NumChannels));
     Al = tril(ones(settings.NumChannels),-1);
-    AdjMatrix = Aui;
+    AdjMatrix = Aui-eye(settings.NumChannels);
     AdjMatrix(AdjMatrix>0) = Wa;
-    AdjMatrix = AdjMatrix + Al.*AdjMatrix';
+    EyeA = eye(settings.NumChannels);
+    AdjMatrix = AdjMatrix + Al.*AdjMatrix'+EyeA;
     AdjMatrix = normAdjacency(AdjMatrix);
     % Atmp(end-size(Wa,1)+1:end,1:size(Wa,2)) = A(end-size(Wa,1)+1:end,1:size(Wa,2)).*Wa;
     % Atmp(1:size(Wa,2),end-size(Wa,1)+1:end) = A(1:size(Wa,2),end-size(Wa,1)+1:end).*(Wa)';
+
+    
 
 elseif contains(loadingName,'sequence')
 
@@ -23,12 +26,17 @@ elseif contains(loadingName,'sequence')
     
     Wa = double(net.Layers(3).Wa);
     AdjMatrix = double(net.Layers(3).Aui);
-    EyeA = double(net.Layers(3).EyeA);
+    if isFixedDiagonal
+        EyeA = double(net.Layers(3).EyeA);
+    else
+        EyeA = zeros(size(AdjMatrix));
+    end
     Al = double(net.Layers(3).Al);
 
     AdjMatrix(AdjMatrix>0) = Wa;
-    AdjMatrix = AdjMatrix + Al.*AdjMatrix' + EyeA;
+    AdjMatrix = AdjMatrix + Al.*AdjMatrix';
 
     AdjMatrix = normAdjacency(AdjMatrix);
+    AdjMatrix = AdjMatrix+EyeA;
 
 end

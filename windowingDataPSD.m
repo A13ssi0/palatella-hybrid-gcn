@@ -10,12 +10,16 @@ for subject = [7 11 15 19 23]
     %%
 %     h_EMG = hilbert(subj.emg.data');
 %     h_EMG = abs(h_EMG');
+%     endName = '_psd_corrected.mat';
+
     
     h_EMG = subj.emg.data;
+    endName = '_psdRaw.mat';
 
     triggers = subj.triggers;
     data = [subj.eeg.data; h_EMG];
     settings = subj.settings;
+
     
     %% Settings
     settings.windowLength = 0.5; %[s]
@@ -28,6 +32,7 @@ for subject = [7 11 15 19 23]
     settings.secCue = 3;
     settings.secPostMovement = 2;
     settings.secPreMovement = 0;
+
     
     %% Calculating PSD and windowing the events
     disp('Calculating PSD')
@@ -59,7 +64,7 @@ for subject = [7 11 15 19 23]
     nWindowPreMov = settings.secPreMovement/settings.windowShift;
     
     tw = settings.windowLength : settings.windowShift : (t_max);
-    windows = nan(length(tw),1);
+    windowsLabel = nan(length(tw),1);
     trials = nan(length(tw),1);
     t = 0;
     
@@ -69,20 +74,22 @@ for subject = [7 11 15 19 23]
     
         if( wlabel>0 )
             t = t+1;
-            windows(wPOS-nWindowPreMov : wPOS+nWindowPostMov-1) = wlabel;
-            windows(wPOS-nWindowCue-nWindowPreMov : wPOS-1-nWindowPreMov) = 0;
+            windowsLabel(wPOS-nWindowPreMov : wPOS+nWindowPostMov-1) = wlabel;
+            windowsLabel(wPOS-nWindowCue-nWindowPreMov : wPOS-1-nWindowPreMov) = 0;
             trials(wPOS-nWindowCue-nWindowPreMov : wPOS+nWindowPostMov-1) = t;
         end
     end
     
-    PSD.windowsLabel = windows;
+    PSD.windowsLabel = windowsLabel;
     PSD.trials = trials;
+    
+    PSD.triggers.time(2:2:end) = PSD.triggers.time(1:2:end) + nWindowPostMov;
     PSD.triggers.time(1:2:end) = PSD.triggers.time(1:2:end) - nWindowPreMov;
-    PSD.triggers.time(2:2:end) = PSD.triggers.time(1:2:end) + nWindowPostMov + nWindowPreMov;
+
     
     
     %% SAVING
-    savingName = [savingPath,'subj',num2str(subject),'_psdRaw.mat'];
+    savingName = [savingPath,'subj',num2str(subject),endName];
     save(savingName, 'PSD','-v7.3');
 end
 %save subj11_psd PSD -v7.3

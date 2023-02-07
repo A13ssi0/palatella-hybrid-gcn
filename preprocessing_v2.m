@@ -6,7 +6,8 @@ savingPath = '/home/palatella/workspace/palatella_datasets/';
 subject = 15;
 sessions = [1 2 3];
 
-secStartStop = 10;
+secStartStop = 10;    % Set an offset for the trial extraction. The marker would be zero when the trial start
+                      % Doing so other 10 second before it is taken
 %% Settings
 savingName = [savingPath,'subj',num2str(subject),'_fullDataset.mat'];
 
@@ -59,9 +60,8 @@ for i = sessions
         markerType = [markerType; strcat(prefix{j},className(idxClassName))'];
         
         
-        nStartStop = secStartStop*subj.settings.eeg.fs*scaleDownsample ;
+        nStartStop = secStartStop*subj.settings.eeg.fs*scaleDownsample ;            
         start = marker.pos(1)-nStartStop;     stop = marker.pos(end)+nStartStop/2;
-        marker.pos = marker.pos;
         pos = round((marker.pos-start)'/scaleDownsample);
         markerTime = [markerTime; pos+size(EEG,1)];
 

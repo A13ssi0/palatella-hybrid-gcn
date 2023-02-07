@@ -3,24 +3,24 @@ function [train, validation, test] = splittingData(data,settings,type)
 num = data.triggers.num;
 windowsLabel = data.windowsLabel;
 
-if length(size(data.data))==2
+if length(size(data.data))==2  % Time domain
     allSxx = permute(data.data,[1,3,4,2]);
     nSamples = size(allSxx,4);
     settings.windowShift = 1/settings.eeg.fs;
-else
+else                           % Frequency (PSD) domain
     Sxx = data.data(:,settings.idxFrequencyChoosen,:);
     nSamples = size(Sxx,1);
     allSxx = permute(Sxx,[3,2,4,1]);
 end
 
 if strcmpi(type,'sequence')
-    nMonwinSize = settings.movwinLength/settings.windowShift;
-    nMonwinShift = settings.movwinShift/settings.windowShift;
-    n_sequences = fix((nSamples-(nMonwinSize-nMonwinShift))/nMonwinShift);
+    nMonWinSize = settings.movWinLength/settings.windowShift;
+    nMonWinShift = settings.movWinShift/settings.windowShift;
+    n_sequences = fix((nSamples-(nMonWinSize-nMonWinShift))/nMonWinShift);
     seq_O = nan(n_sequences, 1);
     onsetNum = [];
     for i = 1:n_sequences
-        start = (i-1)*nMonwinShift+1; stop = start + nMonwinSize - 1;
+        start = (i-1)*nMonWinShift+1; stop = start + nMonWinSize - 1;
         seq_O(i) = windowsLabel(stop);
         if i>1 && seq_O(i)>0 && seq_O(i-1)==0
                 onsetNum = [onsetNum; seq_O(i) i];
@@ -28,13 +28,13 @@ if strcmpi(type,'sequence')
                 onsetNum = [onsetNum; 0 i];
         end
     end
- elseif strcmpi(type,'image')
-     onsetNum = num;
- end
+elseif strcmpi(type,'image')
+    onsetNum = num;
+end
 
 %disp('creating new windows label')
 
-idxTrain = [];idxVal = [];idxTest = [];
+idxTrain = []; idxVal = []; idxTest = [];
 
 % dividind in train, validation and test set
 for i = settings.classes

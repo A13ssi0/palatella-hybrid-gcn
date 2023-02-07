@@ -29,7 +29,6 @@ for subj = subjects
     [losses.micro(i,:), losses.macro(i,:)] = extractingFinalLosses(freqRes, timeRes, mlRes);
     [confMatrices.micro(i,:), confMatrices.macro(i,:)] = extractingConfusionMatrices(freqRes, timeRes, mlRes);
     [timeAccuracies.micro(i,:), timeAccuracies.macro(i,:)] = extractingTimeAccuracies(freqRes, timeRes, mlRes); 
-    %adjacencyMatrices(1,:) = extractingAdjacencyMatrices(freqRes, timeRes);
        
     i = i+1;
 end
@@ -60,7 +59,9 @@ for i = 1:26
     valDownSample = length(timeAccuracies.micro{1,i})/maxPoint;
     if valDownSample<1, valDownSample = 1; end
     for j = 1:size(tmpTimeAccMicro,1)
+        if ~isempty(timeAccuracies.micro{j,i})
         tmpTimeAccMicro(j,i,:)  = downsample(timeAccuracies.micro{j,i},valDownSample);
+        end
         if ~isempty(timeAccuracies.macro{j,i})
             tmpTimeAccMacro(j,i,:) = downsample(timeAccuracies.macro{j,i},valDownSample);
         end
@@ -111,10 +112,10 @@ idxOnsetAcc = find(xx==xEMG(idxOnsetEMG));
 
 start = round((-0.45+0.5)*500+1);
 figure()
-subplot(8,1,[1,2]),
+subplot(3,1,[1,2]),
 plot(xx,100*avTimeInterp)
 ytickformat("percentage")
-title('Best Accuracy and hilbert EMGs')
+title('Best Accuracy and mean hilbert EMG')
 hold on
 xline(xx(idxOnsetAcc))
 xline(xx(idxOnsetAcc+addIdxDelay),'--')
@@ -122,18 +123,19 @@ set(gca,'TickLength',[0 0],'FontWeight','bold')
 xlim([xEMG(1) xEMG(end)])
 ylim([min(100*avTimeInterp)*0.95 max(100*avTimeInterp)*1.05])
 ylabel('Avg Acc')
-for i = 3:8
-    subplot(8,1,i), plot(xEMG, timeAverage(i-2,start:end))
+for i = 3:3
+    subplot(3,1,i), plot(xEMG, timeAverage(i-2,start:end))
     xlim([xEMG(1) xEMG(end)])
     xline(xEMG(idxOnsetEMG))
     xline(xEMG(idxOnsetEMG+addIdxDelay),'--')
-    ylabel(['Ch',num2str(i-2)])
+    ylabel(['Ch',num2str(i-2), '  [\muV]'])
     set(gca,'TickLength',[0 0],'FontWeight','bold')
 end
 xlabel('Time [s]')
 
 %% CONFUSION MATRIX AT CERTAIN TIME
-idxEvalutation = find(x>=xEMG(idxOnsetEMG+addIdxDelay),1,'first');
+%idxEvalutation = find(x>=xEMG(idxOnsetEMG+addIdxDelay),1,'first');
+idxEvalutation = find(x>=xEMG(idxOnsetEMG),1,'first');
 
 loadingPath='\Users\aless\OneDrive\Desktop\Tesi\codes\git_repo\final nets\';
 loadingName = 'nn_GCN_dGRU_sequence_fxdDTime_';
@@ -141,14 +143,15 @@ loadingName = [loadingPath,'fullAdjFxdDiagonal\',loadingName,'subj'];
 
 sbjc = [7 11 15 19 23];
 confusionMatrix = calcConfMatrix(loadingName,idxEvalutation,sbjc);
+%confusionMatrix = calcConfMatrix(loadingName,length(x),sbjc);
 
 figure()
-confusionchart(confusionMatrix,'ColumnSummary','absolute','RowSummary','absolute','Normalization','row-normalized');
+confusionchart(confusionMatrix,'Normalization','row-normalized');%,'ColumnSummary','absolute','RowSummary','absolute',
 
 
 %%
-[rMicro,cMicro] = find(accuracies.micro == max(accuracies.micro,[],'all'));
-[rMacro,cMacro] = find(accuracies.macro == max(accuracies.macro,[],'all'));
+%[rMicro,cMicro] = find(accuracies.micro == max(accuracies.micro,[],'all'));
+%[rMacro,cMacro] = find(accuracies.macro == max(accuracies.macro,[],'all'));
 
 load('chanlocs35.mat');
 ch35 = chanlocs35;
@@ -161,40 +164,45 @@ plot_ch_idx = fidx(eeg_labels,{chanlocs.labels});
 
 % subjects = 7;
 % Atmp = zeros(41);
-% loadingPath='\Users\aless\OneDrive\Desktop\Tesi\codes\git_repo\final nets\';
-% loadingNameStart = 'nn_GCN_dGRU_parallel_fullAdjTime';
+% loadingPath='\Users\aless\OneDrive\Desktop\Tesi\codes\git_repo\final nets\fullAdjfxdDiagonal\';
+% loadingNameStart = 'nn_GCN_dGRU_parallel_fxdDTime';
 % for sbj = subjects
-%     loadingName = [loadingPath,loadingNameStart,'subj',num2str(sbj),'_noRaw'];
-%     AdjMatrix = extractAdjMatrix(loadingName);
+%     loadingName = [loadingPath,loadingNameStart,'subj',num2str(sbj)];
+%     [AdjMatrix,EyeA] = extractAdjMatrix(loadingName);
 % end
-% Atmp = Atmp/length(subjects);
+%Atmp = Atmp/length(subjects);
+% 
 
-subjects = 7;
-Atmp = zeros(41);
+subjects = 15;
+A = zeros(41);
 loadingPath='\Users\aless\OneDrive\Desktop\Tesi\codes\git_repo\final nets\';
-loadingNameStart = 'nn_GCN_dGRU_sequence_fxdDTime_';
-for sbj = subjects
-    %loadingName = [loadingPath,loadingNameStart,'subj',num2str(sbj)];
-    loadingName = [loadingPath,'fullAdjFxdDiagonal\',loadingNameStart,'subj',num2str(sbj)];
-    Atmp = extractAdjMatrix(loadingName);
-end
-Atmp = Atmp/length(subjects);
+%loadingNameStart = 'nn_GCN_dGRU_sequence_fxdDTime_';
+loadingNameStart = 'nn_GCN_dGRU_sequence_fullAdjTime_';
 
+for sbj = subjects
+    loadingName = [loadingPath,loadingNameStart,'subj',num2str(sbj),'_noRaw'];
+    %loadingName = [loadingPath,'fullAdjFxdDiagonal\',loadingNameStart,'subj',num2str(sbj)];
+    [A,EyeA] = extractAdjMatrix(loadingName,false);
+end
+A = A/length(subjects);
+% A = AdjMatrix;
 
 
 k = max(A-EyeA,[],'all');
 l = min(A-EyeA,[],'all');
 lol = max(k,abs(l))*1.25;
 val = 0.6;
-val = lol;
+%val = lol;
 limits = [-val val];
 
 xName = cell(41,1);
 for i = 1:41
     xName(i) = {['N',num2str(i)]};
 end
+
 figure
-imagesc(Atmp)%,limits)
+imagesc(A,limits)
+title('Weighted Adjacency Matrix')
 xticks(1:size(A,1))
 xticklabels(xName)
 yticks(1:size(A,1))

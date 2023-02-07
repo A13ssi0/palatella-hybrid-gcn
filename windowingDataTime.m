@@ -41,15 +41,16 @@ for subject = [7 11 15 19 23]
         pos = triggers.time(i);
     
         if( label>0 )
-            t = t+1;
+            t = t + 1;
             windows(pos-nPointPreMov : pos+nPointPostMov-1) = label;
             windows(pos-nPointCue-nPointPreMov : pos-1-nPointPreMov) = 0;
             trials(pos-nPointCue-nPointPreMov : pos+nPointPostMov-1) = t;
         end
     end
     
+    triggers.time(2:2:end) = triggers.time(1:2:end) + nPointPostMov;
     triggers.time(1:2:end) = triggers.time(1:2:end) - nPointPreMov;
-    triggers.time(2:2:end) = triggers.time(1:2:end) + nPointPostMov + nPointPreMov;
+
     
     subjLabeled.windowsLabel = windows;
     subjLabeled.data = data;

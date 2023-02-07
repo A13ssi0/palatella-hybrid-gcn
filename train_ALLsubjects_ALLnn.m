@@ -2,7 +2,6 @@ close all; clearvars; clc;
 
 subjects = [15 19 23]; %7 11
 
-
 doMacro = false;
 
 savingPath='/home/palatella/workspace/palatella_net/results_run/second try fixed gcn only/';
