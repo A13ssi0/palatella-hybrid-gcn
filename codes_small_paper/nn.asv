@@ -1,0 +1,72 @@
+function [net, info, confMatrix, class, pred, accuracyThresholds] = nn(subject, train,val,test,settings,savingPath,isMacro)
+
+    if ~exist("isMacro",'var'), isMacro = false; end
+
+    startingName = 'nn_CNN_2LSTM_';
+    if isMacro,     startingName = [startingName, 'macro_'];   end
+    
+    disp(['Training ',startingName,' for subject ',num2str(subject)]);
+     
+    [net, info, confMatrix, class, pred, accuracyThresholds] = CNN_2LSTM(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
+    
+    trueTestOutput = test.output;
+    if exist('savingPath','var')
+        savingName = [savingPath,startingName,'subj',num2str(subject),'_CheckRaw'];
+        save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','trueTestOutput','-v7.3');
+    end
+
+end
+
+
+function [net, info, confMatrix, class, pred, accuracyThresholds] = CNN_2LSTM(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest)
+
+   filterSize =
+   numFilters =     
+
+   lgraph = layerGraph([
+        sequenceInputLayer(settings.inputSize,'Name','input','Normalization','zscore','NormalizationDimension','element')
+        sequenceFoldingLayer('Name','foldCNN')
+        convolution2dLayer(filterSize,numFilters)
+        reluLayer('Name','relu')
+        batchNormalizationLayer
+        dropoutLayer(settings.gcnDropOut,'Name','CNNDrop')
+        sequenceUnfoldingLayer('Name','unfoldCNN')
+        flattenLayer('Name','flatten')
+        lstmLayer(settings.NumHiddenUnits,'OutputMode','last','Name','LSTM_1')
+        dropoutLayer(settings.gruDropOut,'Name','LSTM1_Drop')
+        lstmLayer(settings.NumHiddenUnits,'OutputMode','last','Name','LSTM_2')
+        dropoutLayer(settings.gruDropOut,'Name','LSTM2_Drop')
+        fullyConnectedLayer(settings.numClasses,'Name','fc')
+        softmaxLayer('Name','soft')
+        classificationLayer('Name','classification')]);
+
+
+    lgraph = connectLayers(lgraph,'foldCNN/miniBatchSize','unfoldCNN/miniBatchSize');
+
+
+    miniBatchSize = 512;
+    validationFrequency = floor(numel(outputTrain)/miniBatchSize);
+    options = trainingOptions('adam', ...
+        'MiniBatchSize',miniBatchSize, ...
+        'MaxEpochs',15, ...
+        'InitialLearnRate',1e-1, ...
+        'LearnRateSchedule','piecewise', ...
+        'LearnRateDropFactor',1e-1, ...
+        'LearnRateDropPeriod',3, ...
+        'Shuffle', 'once', ...
+        'ValidationFrequency',validationFrequency, ...
+        'Verbose',false, ...
+        'ExecutionEnvironment','gpu', ...
+        'ValidationData',{inputVal,outputVal}), ...
+        'ValidationPatience', 
+        %'Plots','training-progress');
+    
+    % Training
+    [net, info] = trainNetwork(inputTrain, outputTrain, lgraph, options);
+    
+    % Prediction and confusion matrix
+    [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings);
+    %accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings);
+
+end
+
