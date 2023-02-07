@@ -1,6 +1,6 @@
 close all; clearvars; clc;
 
-subjects = [7 11 15 19 23]; %7
+subjects = [15 19 23]; %7 11
 
 
 doMacro = false;
