@@ -33,8 +33,8 @@ windowsLabel = data.windowsLabel;
 
 %% Settings
 settings.fractTrain = 0.6;
-%settings.fractVal = 0.20;
-settings.fractVal = 0;
+settings.fractVal = 0.20;
+%settings.fractVal = 0;
 settings.fractTest = 1 - settings.fractTrain - settings.fractVal;
 
 

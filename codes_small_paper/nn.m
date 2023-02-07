@@ -1,14 +1,29 @@
-function [net, info, confMatrix, class, pred, accuracyThresholds] = nn(subject, train,val,test,settings,savingPath,isMacro)
+function [net, info, confMatrix, class, pred, accuracyThresholds] = nn(subject, train,val,test,settings,savingPath,isMacro,dataType)
 
     if ~exist("isMacro",'var'), isMacro = false; end
 
-    startingName = 'nn_CNN_2LSTM_';
+    startingName = ['nn_CNN_2LSTM_',dataType,'_'];
     if isMacro,     startingName = [startingName, 'macro_'];   end
     
     disp(['Training ',startingName,' for subject ',num2str(subject)]);
      
+    if strcmp(dataType,'EEG')
+        train.input = train.eeg;
+        val.input = val.eeg;
+        test.input = test.eeg;
+        settings.inputSize = [settings.NumEEG, 14, 1];
+    else
+        train.input = train.emg;
+        val.input = val.emg;
+        test.input = test.emg;
+        settings.inputSize = [settings.NumEMG, 14, 1];
+    end
+
+
     [net, info, confMatrix, class, pred, accuracyThresholds] = CNN_2LSTM(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
     
+
+
     trueTestOutput = test.output;
     if exist('savingPath','var')
         savingName = [savingPath,startingName,'subj',num2str(subject)];
@@ -59,9 +74,9 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = CNN_2LSTM(se
         'ValidationFrequency',validationFrequency, ...
         'Verbose',false, ...
         'ExecutionEnvironment','gpu', ...
-        'ValidationData',{inputVal,outputVal}, ...
-        'ValidationPatience', 3,...
-        'OutputNetwork','best-validation-loss');
+        'ValidationData',{inputVal,outputVal});%, ...
+       % 'ValidationPatience', 3,...
+       % 'OutputNetwork','best-validation-loss');
         %'Plots','training-progress');
     
     % Training

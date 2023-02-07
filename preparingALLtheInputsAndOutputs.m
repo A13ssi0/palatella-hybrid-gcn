@@ -20,7 +20,7 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
             typeOfDataInput = 'sequence';
             settings.movWinLength = 2*settings.windowLength; % [s]
             settings.movWinShift = 2*settings.windowShift; % [s]
-            settings.nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/settings.movwinShift;
+            settings.nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/settings.movWinShift;
             [train, val, test] = splittingData(Psd,settings,typeOfDataInput);
         elseif strcmpi(typeOfInput,'image')
             typeOfDataInput = 'image';
