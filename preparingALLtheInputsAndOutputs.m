@@ -36,7 +36,7 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
     % importings time -------------------------------------------------------------------------------
     if strcmpi(typeOfData,'time')
         disp(['importing and splitting the time series of subject ',num2str(numSubject)])
-        filenameTime = ['subj',num2str(numSubject),'_labeled_corrected.mat'];
+        filenameTime = ['subj',num2str(numSubject),'_labeledRaw.mat'];
         [timeSeries,settings] = startingTrain(filenameTime,classes);
         fs = settings.eeg.fs;
     
@@ -50,9 +50,9 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
         if strcmpi(typeOfInput,'sequence')
             typeOfDataInput = 'sequence';
             settings.windowShift = 1/fs;
-            settings.movwinLength = 1;
-            settings.movwinShift = 0.04; 
-            settings.nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/settings.movwinShift;
+            settings.movWinLength = 1;
+            settings.movWinShift = 0.04; 
+            settings.nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/settings.movWinShift;
             [train, val, test] = splittingData(timeSeries,settings,typeOfDataInput);
         elseif strcmpi(typeOfInput,'image')
             settings.windowShift = 1/fs;

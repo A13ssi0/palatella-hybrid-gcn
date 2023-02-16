@@ -1,17 +1,32 @@
-function [net, info, confMatrix, class, pred, accuracyThresholds] = nn(subject, train,val,test,settings,savingPath,isMacro)
+function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_CNN_2LSTM(subject, train,val,test,settings,savingPath,isMacro,dataType)
 
     if ~exist("isMacro",'var'), isMacro = false; end
 
-    startingName = 'nn_CNN_2LSTM_';
+    startingName = ['nn_CNN_2LSTM_',dataType,'_'];
     if isMacro,     startingName = [startingName, 'macro_'];   end
     
     disp(['Training ',startingName,' for subject ',num2str(subject)]);
      
+    if strcmp(dataType,'EEG')
+        train.input = train.eeg;
+        val.input = val.eeg;
+        test.input = test.eeg;
+        settings.inputSize = [settings.NumEEG, 14, 1];
+    else
+        train.input = train.emg;
+        val.input = val.emg;
+        test.input = test.emg;
+        settings.inputSize = [settings.NumEMG, 14, 1];
+    end
+
+
     [net, info, confMatrix, class, pred, accuracyThresholds] = CNN_2LSTM(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
     
+
+
     trueTestOutput = test.output;
     if exist('savingPath','var')
-        savingName = [savingPath,startingName,'subj',num2str(subject),'_CheckRaw'];
+        savingName = [savingPath,startingName,'subj',num2str(subject)];
         save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','trueTestOutput','-v7.3');
     end
 
@@ -20,8 +35,10 @@ end
 
 function [net, info, confMatrix, class, pred, accuracyThresholds] = CNN_2LSTM(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest)
 
-   filterSize =
-   numFilters =     
+   filterSize = 3;
+   numFilters = 32; 
+   dropOut = 0.1;
+   hiddenUnitsLSTM = [250 100];
 
    lgraph = layerGraph([
         sequenceInputLayer(settings.inputSize,'Name','input','Normalization','zscore','NormalizationDimension','element')
@@ -29,13 +46,13 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = CNN_2LSTM(se
         convolution2dLayer(filterSize,numFilters)
         reluLayer('Name','relu')
         batchNormalizationLayer
-        dropoutLayer(settings.gcnDropOut,'Name','CNNDrop')
+        dropoutLayer(dropOut,'Name','CNNDrop')
         sequenceUnfoldingLayer('Name','unfoldCNN')
         flattenLayer('Name','flatten')
-        lstmLayer(settings.NumHiddenUnits,'OutputMode','last','Name','LSTM_1')
-        dropoutLayer(settings.gruDropOut,'Name','LSTM1_Drop')
-        lstmLayer(settings.NumHiddenUnits,'OutputMode','last','Name','LSTM_2')
-        dropoutLayer(settings.gruDropOut,'Name','LSTM2_Drop')
+        lstmLayer(hiddenUnitsLSTM(1),'OutputMode','last','Name','LSTM_1')
+        dropoutLayer(dropOut,'Name','LSTM1_Drop')
+        lstmLayer(hiddenUnitsLSTM(2),'OutputMode','last','Name','LSTM_2')
+        dropoutLayer(dropOut,'Name','LSTM2_Drop')
         fullyConnectedLayer(settings.numClasses,'Name','fc')
         softmaxLayer('Name','soft')
         classificationLayer('Name','classification')]);
@@ -49,16 +66,17 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = CNN_2LSTM(se
     options = trainingOptions('adam', ...
         'MiniBatchSize',miniBatchSize, ...
         'MaxEpochs',15, ...
-        'InitialLearnRate',1e-1, ...
+        'InitialLearnRate',1e-2, ...
         'LearnRateSchedule','piecewise', ...
         'LearnRateDropFactor',1e-1, ...
-        'LearnRateDropPeriod',3, ...
+        'LearnRateDropPeriod',4, ...
         'Shuffle', 'once', ...
         'ValidationFrequency',validationFrequency, ...
         'Verbose',false, ...
         'ExecutionEnvironment','gpu', ...
-        'ValidationData',{inputVal,outputVal}), ...
-        'ValidationPatience', 
+        'ValidationData',{inputVal,outputVal});%, ...
+       % 'ValidationPatience', 3,...
+       % 'OutputNetwork','best-validation-loss');
         %'Plots','training-progress');
     
     % Training
@@ -66,6 +84,7 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = CNN_2LSTM(se
     
     % Prediction and confusion matrix
     [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings);
+    accuracyThresholds = nan;
     %accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings);
 
 end

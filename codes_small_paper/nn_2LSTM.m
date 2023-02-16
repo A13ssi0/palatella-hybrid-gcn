@@ -1,9 +1,13 @@
-function [net, info, confMatrix, class, pred, accuracyThresholds] = nn(subject, train,val,test,settings,savingPath,isMacro,dataType)
+function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_2LSTM(subject, train,val,test,settings,savingPath,isMacro,dataType,isTime)
 
-    if ~exist("isMacro",'var'), isMacro = false; end
+    if ~exist("isMacro",'var') || isempty(isMacro), isMacro = false; end
+    if ~exist("isTime",'var') || isempty(isTime), isTime = false; end
 
-    startingName = ['nn_CNN_2LSTM_',dataType,'_'];
+
+    startingName = ['nn_2LSTM_',dataType,'_'];
     if isMacro,     startingName = [startingName, 'macro_'];   end
+    if isTime,     startingName = [startingName, 'timeRaw_'];   end
+    
     
     disp(['Training ',startingName,' for subject ',num2str(subject)]);
      
@@ -11,16 +15,16 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn(subject, 
         train.input = train.eeg;
         val.input = val.eeg;
         test.input = test.eeg;
-        settings.inputSize = [settings.NumEEG, 14, 1];
+        settings.inputSize = [settings.NumEEG, 1, 1, 250];
     else
         train.input = train.emg;
         val.input = val.emg;
         test.input = test.emg;
-        settings.inputSize = [settings.NumEMG, 14, 1];
+        settings.inputSize = [settings.NumEMG, 1, 1, 250];
     end
 
 
-    [net, info, confMatrix, class, pred, accuracyThresholds] = CNN_2LSTM(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
+    [net, info, confMatrix, class, pred, accuracyThresholds] = LSTM2(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
     
 
 
@@ -33,21 +37,13 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn(subject, 
 end
 
 
-function [net, info, confMatrix, class, pred, accuracyThresholds] = CNN_2LSTM(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest)
-
-   filterSize = 3;
-   numFilters = 32; 
+function [net, info, confMatrix, class, pred, accuracyThresholds] = LSTM2(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest)
+ 
    dropOut = 0.1;
    hiddenUnitsLSTM = [250 100];
 
    lgraph = layerGraph([
         sequenceInputLayer(settings.inputSize,'Name','input','Normalization','zscore','NormalizationDimension','element')
-        sequenceFoldingLayer('Name','foldCNN')
-        convolution2dLayer(filterSize,numFilters)
-        reluLayer('Name','relu')
-        batchNormalizationLayer
-        dropoutLayer(dropOut,'Name','CNNDrop')
-        sequenceUnfoldingLayer('Name','unfoldCNN')
         flattenLayer('Name','flatten')
         lstmLayer(hiddenUnitsLSTM(1),'OutputMode','last','Name','LSTM_1')
         dropoutLayer(dropOut,'Name','LSTM1_Drop')
@@ -56,9 +52,6 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = CNN_2LSTM(se
         fullyConnectedLayer(settings.numClasses,'Name','fc')
         softmaxLayer('Name','soft')
         classificationLayer('Name','classification')]);
-
-
-    lgraph = connectLayers(lgraph,'foldCNN/miniBatchSize','unfoldCNN/miniBatchSize');
 
 
     miniBatchSize = 512;
