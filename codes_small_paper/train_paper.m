@@ -16,9 +16,19 @@ for numSubject = subjects
   settings.classes = classes;
   [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'time','sequence');
   [train, val, test, settings] = divide_EEG_EMG_half_time(train, val, test, settings);
+  savePathTest = '/home/palatella/workspace/palatella_datasets/test set for small paper/';
+  saveName = ['testSet_subj',num2str(numSubject)];
+  if isTime
+      saveNameTest = [savePathTest,saveName,'_time_EMGRaw'];
+  else
+      saveNameTest = [savePathTest,saveName,'_psd'];
+  end
+  disp('Saving the test set')
+  save(saveNameTest,'test','-mat')
+
   
   %dataType = 'EEG';
-  %nn(numSubject, train,val,test,settings,savingPath,isMacro,dataType);
+  %nn_CNN_2LSTM(numSubject, train,val,test,settings,savingPath,isMacro,dataType);
   dataType = 'EMG';
   nn_2LSTM(numSubject, train,val,test,settings,savingPath,isMacro,dataType,isTime);
 
@@ -26,7 +36,7 @@ for numSubject = subjects
   
   isMacro = true;     
   %dataType = 'EEG';
-  %nn(numSubject, train,val,test,settings,savingPath,isMacro,dataType);
+  %nn_CNN_2LSTM(numSubject, train,val,test,settings,savingPath,isMacro,dataType);
   dataType = 'EMG';
   nn_2LSTM(numSubject, train,val,test,settings,savingPath,isMacro,dataType,isTime);
     

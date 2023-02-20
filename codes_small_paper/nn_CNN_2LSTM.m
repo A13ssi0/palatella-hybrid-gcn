@@ -11,12 +11,12 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_CNN_2LSTM
         train.input = train.eeg;
         val.input = val.eeg;
         test.input = test.eeg;
-        settings.inputSize = [settings.NumEEG, 14, 1];
+        settings.inputSize = size(train.input{1},1:3);
     else
         train.input = train.emg;
         val.input = val.emg;
         test.input = test.emg;
-        settings.inputSize = [settings.NumEMG, 14, 1];
+        settings.inputSize = size(train.input{1},1:3);
     end
 
 
