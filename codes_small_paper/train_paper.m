@@ -24,7 +24,7 @@ for numSubject = subjects
       saveNameTest = [savePathTest,saveName,'_psd'];
   end
   disp('Saving the test set')
-  save(saveNameTest,'test','-mat')
+  save(saveNameTest,'test')
 
   
   %dataType = 'EEG';
