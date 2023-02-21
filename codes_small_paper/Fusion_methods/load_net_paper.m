@@ -30,7 +30,7 @@ else
 end
 
 if cutEnd
-    net = layerGraph(net);
+    net = layerGraph(net.net);
     net = removeLayers(net,'classification');
 end
 

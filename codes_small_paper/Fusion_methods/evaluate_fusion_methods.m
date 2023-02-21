@@ -20,5 +20,4 @@ for numSubject = subjects
     EMGNet = load_net_paper(netPath,numSubject,'EMG',netSettings.emg);
 
     testSet = load_testSet_paper(testSetPath,numSubject,netSettings);
-
 end

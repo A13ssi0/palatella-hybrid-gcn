@@ -6,13 +6,15 @@ disp(['Loading test set for subject ',num2str(numSubject)])
 loadName = ['testSet_subj',num2str(numSubject)];
 loadNameTest = [testSetPath,loadName,'_psd'];
 
-testSet.eeg = load(loadNameTest,'test.eeg');
-testSet.output = load(loadNameTest,'test.output');
+test = load(loadNameTest,'-mat');
+testSet.eeg = test.test.eeg;
+testSet.output = test.test.output;
 
 
 if settings.emg.timeDomain
     loadNameTest = [testSetPath,loadName,'_time_EMGRaw'];
-    testSet.emg = load(loadNameTest,'test.emg');
+    test = load(loadNameTest,'-mat');
+    testSet.emg = test.test.emg;
 else
-    testSet.emg = load(loadNameTest,'test.emg');
+    testSet.emg = test.test.emg;
 end
