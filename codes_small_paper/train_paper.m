@@ -16,6 +16,7 @@ for numSubject = subjects
   settings.classes = classes;
   [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'time','sequence');
   [train, val, test, settings] = divide_EEG_EMG_half_time(train, val, test, settings);
+  
   savePathTest = '/home/palatella/workspace/palatella_datasets/test set for small paper/';
   saveName = ['testSet_subj',num2str(numSubject)];
   if isTime

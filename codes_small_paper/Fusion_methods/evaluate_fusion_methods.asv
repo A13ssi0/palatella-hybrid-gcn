@@ -1,0 +1,26 @@
+close all; clearvars; clc;
+
+
+netPath = '';
+testSetPath = '';
+
+subjects = [7 11 13 23 29];
+
+
+netSettings.eeg.macro = false;
+netSettings.eeg.cutEnd = true;
+
+netSettings.emg.timeDomain = false;
+netSettings.emg.macro = false;
+netSettings.emg.cutEnd = true;
+
+
+%%
+for numSubject = subjects
+
+    EEGNet = load_net_paper(netPath,numSubject,'EEG',netSettings.eeg);
+    EMGNet = load_net_paper(netPath,numSubject,'EMG',netSettings);
+
+    testSet = load_testSet_paper(netPath,numSubject,'EMG',netSettings);
+
+end
