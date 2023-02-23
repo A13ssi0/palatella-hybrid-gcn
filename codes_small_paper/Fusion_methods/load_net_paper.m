@@ -3,7 +3,6 @@ function net = load_net_paper(netPath,numSubject,dataType,settings)
 disp(['Loading ',dataType,' net for subject ',num2str(numSubject)])
 
 isMacro = settings.macro;
-cutEnd = settings.cutEnd;
 
 loadName = [netPath,'nn_'];
 
@@ -23,15 +22,10 @@ loadName = [loadName,'subj',num2str(numSubject)];
 
 
 if nargout>0
-    net = load(loadName,'net');     
+    net = load(loadName,'net','confMatrix');   
 else 
     net = load(loadName);
     return
-end
-
-if cutEnd
-    net = layerGraph(net.net);
-    net = removeLayers(net,'classification');
 end
 
 

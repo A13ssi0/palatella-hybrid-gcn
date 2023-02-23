@@ -24,6 +24,3 @@ end
 Score = ones(1, NumClasses) - Score./(2*NumClasses);
 [~, Pred] = max(Score);
 Score = Score./sum(Score);
-
-end
-

@@ -1,4 +1,5 @@
 function [Pred, Score] = bayesian_fusion_v2(O1, O2, CM1, CM2, priors, group1, group2)%, mode)
+% [Pred, Score] = bayesian_fusion_v2(O1, O2, CM1, CM2, priors, group1, group2)
 % - O1 and O2 are the predicted classes of the models
 % - CM1 and CM2 are confusion matrices of the classifiers
 % - Priors is a vector (1xClasses) to evaluate the priori probabilities of the classes
@@ -19,13 +20,14 @@ if nargin < 7 || isempty(group2)
     group2 = 1:NumClasses;
 end
 
-
+O1 = double(O1);
+O2 = double(O2);
 Score = nan(1, NumClasses);
 
 CM1 = CM1./sum(CM1,1);
 CM2 = CM2./sum(CM2,1);
 for c = 1:NumClasses
-    Score(c) = (CM1(group1(c), O1) * CM2(group2(c), O2)) / priors(c);
+    Score(c) = CM1(group1(c), O1) * CM2(group2(c), O2) / priors(c);
 end
 
 [~, Pred] = max(Score);

@@ -23,5 +23,3 @@ FT = nan(2, NumClasses, NumClasses);
 for i = 1:NumClasses
     FT(:,:,i) = mean(D(:,:,Z==i),3);
 end
-
-end
