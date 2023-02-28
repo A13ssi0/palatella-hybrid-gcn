@@ -39,6 +39,9 @@ results.naive.score = nan(nTrial,nClasses);
 results.bayesian.class = nan(nTrial,1);
 results.bayesian.score = nan(nTrial,nClasses);
 
+
+% EXTRACT FUZZY TEMPLATE AND USE IT
+
 for i = 1:nTrial
     [results.naive.class(i), results.naive.score(i,:)] = naive_fusion_v2(eegPred(i,:), emgPred(i,:));
     [results.bayesian.class(i), results.bayesian.score(i,:)] = bayesian_fusion_v2(eegClass(i), emgClass(i), eegConfM, emgConfM);

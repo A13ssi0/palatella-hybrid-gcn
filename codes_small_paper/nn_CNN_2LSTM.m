@@ -20,20 +20,20 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_CNN_2LSTM
     end
 
 
-    [net, info, confMatrix, class, pred, accuracyThresholds] = CNN_2LSTM(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
+    [net, info, confMatrix, class, pred, accuracyThresholds, probPredValidation] = CNN_2LSTM(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
     
 
 
     trueTestOutput = test.output;
     if exist('savingPath','var')
         savingName = [savingPath,startingName,'subj',num2str(subject)];
-        save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','trueTestOutput','-v7.3');
+        save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','trueTestOutput','probPredValidation','-v7.3');
     end
 
 end
 
 
-function [net, info, confMatrix, class, pred, accuracyThresholds] = CNN_2LSTM(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest)
+function [net, info, confMatrix, class, pred, accuracyThresholds, probPredValidation] = CNN_2LSTM(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest)
 
    filterSize = 3;
    numFilters = 32; 
@@ -82,6 +82,8 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = CNN_2LSTM(se
     % Training
     [net, info] = trainNetwork(inputTrain, outputTrain, lgraph, options);
     
+    probPredValidation = predict(net, inputVal);
+
     % Prediction and confusion matrix
     [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings);
     accuracyThresholds = nan;
