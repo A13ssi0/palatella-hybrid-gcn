@@ -11,16 +11,18 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
 
     % importings PSD -------------------------------------------------------------------------------
     if strcmpi(typeOfData,'psd')
-        disp(['importing and splitting the PSD of subject ',num2str(numSubject)])
-        filenamePSD = ['subj',num2str(numSubject),'_psd_corrected.mat'];
+        disp(['Importing the PSD of subject ',num2str(numSubject)])
+        filenamePSD = ['subj',num2str(numSubject),'_psd_corrected_LOONG.mat'];
         %filenamePSD = ['subj',num2str(numSubject),'_psd.mat'];
+        filenamePSD = ['/home/palatella/workspace/palatella_datasets/0.5 before 1 after onset/',filenamePSD];
         [Psd,settings] = startingTrain(filenamePSD,classes);
     
+        disp(['Splitting the PSD of subject ',num2str(numSubject)])
         if strcmpi(typeOfInput,'sequence')
             typeOfDataInput = 'sequence';
             settings.movWinLength = 2*settings.windowLength; % [s]
             settings.movWinShift = 2*settings.windowShift; % [s]
-            settings.nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/settings.movWinShift;
+            settings.nWindowsTrial = fix((settings.secPostMovement+settings.secPreMovement)/settings.movWinShift);
             [train, val, test] = splittingData(Psd,settings,typeOfDataInput);
         elseif strcmpi(typeOfInput,'image')
             typeOfDataInput = 'image';
