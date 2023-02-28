@@ -2,7 +2,8 @@ function [input, output] = createInputOutputMatrices(data, indicesToTake, onsetN
 
 nMonwinSize = settings.movWinLength/settings.windowShift;
 nMonwinShift = settings.movWinShift/settings.windowShift;
-nWindowsTrial = onsetNum(2,2)-onsetNum(1,2);
+%nWindowsTrial = onsetNum(2,2)-onsetNum(1,2);
+nWindowsTrial = settings.nWindowsTrial;
 
 if exist('settings.dataSingle','var') && settings.dataSingle
     data = single(data);
@@ -11,6 +12,7 @@ end
 input = cell(length(indicesToTake)*nWindowsTrial,1);
 output = nan(size(input));
 
+%disp(num2str(length(indicesToTake)))
 for i = 1:length(indicesToTake)
 
     if onsetNum(indicesToTake(i),1) ~= 0
@@ -25,7 +27,7 @@ for i = 1:length(indicesToTake)
         start = (j-1)*nMonwinShift+1; stop = start + nMonwinSize - 1;
         seq_I{countTrial} = data(:,:,:,start:stop);
     end
-
+    %disp(num2str(i))
     input((1:nWindowsTrial)+(i-1)*nWindowsTrial) = seq_I;
     output((1:nWindowsTrial)+(i-1)*nWindowsTrial) = onsetNum(indicesToTake(i),1);
 end

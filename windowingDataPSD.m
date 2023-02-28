@@ -1,20 +1,20 @@
 close all; clearvars; clc;
 
 
-for subject = [7 11 15 19 23]
-    savingPath='/home/palatella/workspace/palatella_datasets/';
-    disp('importing the data')
+for subject = 15 %;[11 15 19 23] % 7
+    savingPath='/home/palatella/workspace/palatella_datasets/0.5 before 1 after onset/';
+    disp(['Importing the data of subject ',num2str(subject)])
     filename = ['subj',num2str(subject),'_pruned.mat'];
     load(filename)
     
     %%
-%     h_EMG = hilbert(subj.emg.data');
-%     h_EMG = abs(h_EMG');
-%     endName = '_psd_corrected.mat';
+    %h_EMG = hilbert(subj.emg.data');
+    %h_EMG = abs(h_EMG');
+    %endName = '_psd_corrected_LOONG.mat';
 
     
-    h_EMG = subj.emg.data;
-    endName = '_psdRaw.mat';
+     h_EMG = subj.emg.data;
+%     endName = '_psdRaw.mat';
 
     triggers = subj.triggers;
     data = [subj.eeg.data; h_EMG];
@@ -29,9 +29,9 @@ for subject = [7 11 15 19 23]
     settings.windowStep = settings.windowShift*settings.eeg.fs;
     settings.windowSize = settings.windowLength*settings.eeg.fs;
     
-    settings.secCue = 3;
+    settings.secCue = 0;
     settings.secPostMovement = 2;
-    settings.secPreMovement = 0;
+    settings.secPreMovement = 0;%0.04*fix(5/0.04);
 
     
     %% Calculating PSD and windowing the events
@@ -85,11 +85,9 @@ for subject = [7 11 15 19 23]
     
     PSD.triggers.time(2:2:end) = PSD.triggers.time(1:2:end) + nWindowPostMov;
     PSD.triggers.time(1:2:end) = PSD.triggers.time(1:2:end) - nWindowPreMov;
-
     
     
     %% SAVING
-    savingName = [savingPath,'subj',num2str(subject),endName];
-    save(savingName, 'PSD','-v7.3');
+    %savingName = [savingPath,'subj',num2str(subject),endName];
+    %save(savingName, 'PSD','-v7.3');
 end
-%save subj11_psd PSD -v7.3

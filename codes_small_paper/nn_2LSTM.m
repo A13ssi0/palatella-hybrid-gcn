@@ -30,7 +30,9 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_2LSTM(sub
 
     trueTestOutput = test.output;
     if exist('savingPath','var')
-        savingName = [savingPath,startingName,'subj',num2str(subject)];
+        %savingName = [savingPath,startingName,'subj',num2str(subject)];
+        %save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','trueTestOutput','probPredValidation','-v7.3');
+        savingName = [savingPath,startingName,'subj',num2str(subject),'_testSecondsBefore_LOONG'];
         save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','trueTestOutput','probPredValidation','-v7.3');
     end
 
@@ -79,8 +81,8 @@ function [net, info, confMatrix, class, pred, accuracyThresholds, probPredValida
     
     % Prediction and confusion matrix
     [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings);
-    accuracyThresholds = nan;
-    %accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings);
+    %accuracyThresholds = nan;
+    accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings);
 
 end
 
