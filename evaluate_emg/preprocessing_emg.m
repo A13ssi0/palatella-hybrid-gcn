@@ -12,7 +12,7 @@ subj.settings.eeg.fs = 2500/subj.settings.downsampling;
 
 
 %% Transforming to matrix the EEG datasets
-for numSubj = 23%[7 11 15 19 23]
+for numSubj = 7%[7 11 15 19 23]
     subject = numSubj;
     clearvars triggers
     movement = {'reaching','twist','multigrasp'};

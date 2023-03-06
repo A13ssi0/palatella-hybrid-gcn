@@ -1,12 +1,12 @@
-function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_2LSTM(subject, train,val,test,settings,savingPath,isMacro,dataType,isTime)
+function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_2LSTM(subject, train,val,test,settings,savingPath,isMacro,dataType,isTime,doFatigue)
 
     if ~exist("isMacro",'var') || isempty(isMacro), isMacro = false; end
     if ~exist("isTime",'var') || isempty(isTime), isTime = false; end
 
 
     startingName = ['nn_2LSTM_',dataType,'_'];
-    if isMacro,     startingName = [startingName, 'macro_'];   end
-    if isTime,     startingName = [startingName, 'timeRaw_'];   end
+    if isMacro,     startingName = [startingName, 'macro_'];     end
+    if isTime,      startingName = [startingName, 'timeRaw_'];   end
     
     
     disp(['Training ',startingName,' for subject ',num2str(subject)]);
@@ -25,15 +25,58 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_2LSTM(sub
 
 
     [net, info, confMatrix, class, pred, accuracyThresholds, probPredValidation] = LSTM2(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
-    
 
-
+    trueValOutput = val.output;
     trueTestOutput = test.output;
     if exist('savingPath','var')
-        %savingName = [savingPath,startingName,'subj',num2str(subject)];
-        %save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','trueTestOutput','probPredValidation','-v7.3');
-        savingName = [savingPath,startingName,'subj',num2str(subject),'_testSecondsBefore_LOONG'];
-        save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','trueTestOutput','probPredValidation','-v7.3');
+        savingName = [savingPath,startingName,'subj',num2str(subject),'_25Hz_raw'];
+        save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','trueTestOutput','probPredValidation','trueValOutput','-v7.3');
+    end
+
+
+    
+    if doFatigue
+        attenuation = [0.1 0.5 0.7 0.9];
+        loadingPathFat ='/home/palatella/workspace/palatella_datasets/only emg/fatigue/';
+        savingPathFat='/home/palatella/workspace/palatella_net/netSmallPaper/filtered 25 Hz/fatigue/';
+
+        for att = attenuation
+            disp(['Attenuation of ',num2str(fix(att*100))])
+            filenamePSD = [loadingPathFat,'s',num2str(subject),'_wind25Hz_raw_attenuation',num2str(fix(att*100))];
+
+            classes = 1:11;
+            settings.classes = classes;
+            [Psd,settings] = startingTrain(filenamePSD,classes);
+            settings.numSubject = subject;
+
+            settings.movWinLength = 2*settings.windowLength; % [s]
+            settings.movWinShift = 2*settings.windowShift; % [s]
+            settings.nWindowsTrial = fix((settings.secPostMovement+settings.secPreMovement)/settings.movWinShift);
+
+            typeOfDataInput = 'sequence';
+            [train, val, test] = splittingData(Psd,settings,typeOfDataInput);
+
+            settings.NumEEG = 0;
+            settings.NumEMG = 7;
+            [train, val, test, settings] = divide_EEG_EMG_half_time(train, val, test, settings);
+
+            [~, val, test, settings] = microToMacroClasses(train,val,test,settings); 
+
+            val.input = val.emg;
+            test.input = test.emg;
+            
+            probPredValidation = predict(net, val.input);
+
+            [confMatrix, class, pred] = trial_predict(net, test.input, test.output, settings);
+            accuracyThresholds = thresholdAccuracy(pred.cumul, test.output, settings);
+
+            trueValOutput = val.output;
+            trueTestOutput = test.output;
+            savingName = [savingPathFat,startingName,'subj',num2str(subject),'_25Hz_raw_attenuation',num2str(fix(att*100))];
+            save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','trueTestOutput','probPredValidation','trueValOutput','-v7.3');
+
+        end
+
     end
 
 end

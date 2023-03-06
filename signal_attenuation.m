@@ -1,4 +1,5 @@
 function attenuated_signal = signal_attenuation(signal, attenuation, mode)
+% signal = channel x N
 
 if strcmp(mode, 'max') || nargin < 3 || isempty(mode)
 signal_max = repmat(max(signal, [], 2), [1 size(signal, 2)]);

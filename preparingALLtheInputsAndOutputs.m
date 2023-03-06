@@ -12,10 +12,12 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
     % importings PSD -------------------------------------------------------------------------------
     if strcmpi(typeOfData,'psd')
         disp(['Importing the PSD of subject ',num2str(numSubject)])
-        filenamePSD = ['subj',num2str(numSubject),'_psd_corrected_LOONG.mat'];
-        %filenamePSD = ['subj',num2str(numSubject),'_psd.mat'];
-        filenamePSD = ['/home/palatella/workspace/palatella_datasets/0.5 before 1 after onset/',filenamePSD];
+        %filenamePSD = ['s',num2str(numSubject),'_wind25Hz_raw.mat'];
+        filenamePSD = ['subj',num2str(numSubject),'_psd_corrected.mat'];
+        %filenamePSD = ['/home/palatella/workspace/palatella_datasets/only emg/healthy/',filenamePSD];
         [Psd,settings] = startingTrain(filenamePSD,classes);
+
+        settings.numSubject = numSubject;
     
         disp(['Splitting the PSD of subject ',num2str(numSubject)])
         if strcmpi(typeOfInput,'sequence')

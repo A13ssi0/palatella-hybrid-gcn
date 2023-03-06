@@ -13,46 +13,26 @@ else                           % Frequency (PSD) domain
     allSxx = permute(Sxx,[3,2,4,1]);
 end
 
-if strcmpi(type,'sequence')
-    nMonWinSize = settings.movWinLength/settings.windowShift;
-    nMonWinShift = settings.movWinShift/settings.windowShift;
-    n_sequences = fix((nSamples-(nMonWinSize-nMonWinShift))/nMonWinShift);
-    seq_O = nan(n_sequences, 1);
-    onsetNum = [];
-    for i = 1:n_sequences
-        start = (i-1)*nMonWinShift+1; stop = start + nMonWinSize - 1;
-        seq_O(i) = windowsLabel(stop);
-        if i>1 && seq_O(i)>0 && seq_O(i-1)==0
-                onsetNum = [onsetNum; seq_O(i) i];
-        elseif i>1 && isnan(seq_O(i)) && seq_O(i-1)>0
-                onsetNum = [onsetNum; 0 i];
-        end
-    end
-elseif strcmpi(type,'image')
-    onsetNum = num;
-end
-
-%disp('creating new windows label')
-
-idxTrain = []; idxVal = []; idxTest = [];
-
-% dividind in train, validation and test set
-for i = settings.classes
-    idxLabel = find(onsetNum(:,1) == i);
-    numTrain = round(length(idxLabel)*settings.fractTrain);
-    numVal = round(length(idxLabel)*settings.fractVal);
-    numTest = round(length(idxLabel)*settings.fractTest);
-
-    tempidxTrain = datasample(idxLabel,numTrain,'Replace',false);
-    tempidxVal = datasample(setdiff(idxLabel, tempidxTrain),numVal,'Replace',false);
-    tempidxTest = datasample(setdiff(idxLabel, [tempidxTrain; tempidxVal]),numTest,'Replace',false);
-
-    idxTrain = [idxTrain; tempidxTrain];
-    idxVal = [idxVal; tempidxVal];
-    idxTest = [idxTest; tempidxTest];
+nameFile = ['/home/palatella/workspace/idxTrainValTest25Hz_',num2str(settings.numSubject),'.mat'];
+if isfile(nameFile)
+    load(['/home/palatella/workspace/idxTrainValTest25Hz_',num2str(settings.numSubject)])    
+else
+    [idxTrain,idxVal,idxTest,onsetNum] = chooseIndices(windowsLabel,settings,nSamples,type);
+    save(nameFile,'idxTrain',"idxTest","idxVal","onsetNum")  
 end
 
 %disp('creating the input matrix')
+
+if size(allSxx,1) > 7
+    nMonWinSize = settings.movWinLength/settings.windowShift;
+    nMonWinShift = settings.movWinShift/settings.windowShift;
+    idxWindows = nMonWinSize:nMonWinShift:nSamples;
+    seq_O = windowsLabel(idxWindows);
+    seq_O(isnan(seq_O)) = 0;
+    diffSeq_O = diff(seq_O);
+    idxChanges = find(diffSeq_O~=0)+1;
+    onsetNum = [seq_O(idxChanges) idxChanges];
+end
 
 if strcmpi(type,'sequence')
     [train.input, train.output] = createInputOutputMatrices(allSxx, idxTrain, onsetNum, settings);

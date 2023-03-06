@@ -21,13 +21,12 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_CNN_2LSTM
 
 
     [net, info, confMatrix, class, pred, accuracyThresholds, probPredValidation] = CNN_2LSTM(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
-    
 
-
+    trueValOutput = val.output;
     trueTestOutput = test.output;
     if exist('savingPath','var')
         savingName = [savingPath,startingName,'subj',num2str(subject)];
-        save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','trueTestOutput','probPredValidation','-v7.3');
+        save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','trueTestOutput','probPredValidation','trueValOutput','-v7.3');
     end
 
 end
