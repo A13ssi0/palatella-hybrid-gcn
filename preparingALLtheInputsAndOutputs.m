@@ -1,4 +1,4 @@
-function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,typeOfData, typeOfInput)
+function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,typeOfData, typeOfInput,typeOfSignal,snr, attenuation, percRecalibration)
 
     NumHiddenUnits = 150;
     NumOutFeatures = 42;
@@ -12,9 +12,22 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
     % importings PSD -------------------------------------------------------------------------------
     if strcmpi(typeOfData,'psd')
         disp(['Importing the PSD of subject ',num2str(numSubject)])
-        %filenamePSD = ['s',num2str(numSubject),'_wind25Hz_raw.mat'];
-        filenamePSD = ['subj',num2str(numSubject),'_psd_corrected.mat'];
-        %filenamePSD = ['/home/palatella/workspace/palatella_datasets/only emg/healthy/',filenamePSD];
+        if strcmpi(typeOfSignal,'EEG')
+            filenamePSD = ['subj',num2str(numSubject),'_psd_corrected.mat'];
+            %filenamePSD = ['/home/palatella/workspace/palatella_datasets/imagery dataset/s7_imagery'];
+        else
+            if exist('attenuation','var') && ~isempty(attenuation)
+                filenamePSD = ['/home/palatella/workspace/palatella_datasets/only emg/fatigue/'];
+                filenamePSD = [filenamePSD,'s',num2str(numSubject),'_wind25Hz_raw_attenuation',num2str(fix(attenuation*100))];
+            elseif exist('snr','var') && ~isempty(snr)
+            %if exist('snr','var') && ~isempty(snr)
+                filenamePSD = ['s',num2str(numSubject),'_wind25Hz_raw_snr',num2str(snr),'.mat'];
+                filenamePSD = ['/home/palatella/workspace/palatella_datasets/only emg/paraplegic/',filenamePSD];
+            else
+                filenamePSD = ['s',num2str(numSubject),'_wind25Hz_raw'];
+                filenamePSD = ['/home/palatella/workspace/palatella_datasets/only emg/healthy/',filenamePSD];
+            end
+        end
         [Psd,settings] = startingTrain(filenamePSD,classes);
 
         settings.numSubject = numSubject;
@@ -25,7 +38,7 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
             settings.movWinLength = 2*settings.windowLength; % [s]
             settings.movWinShift = 2*settings.windowShift; % [s]
             settings.nWindowsTrial = fix((settings.secPostMovement+settings.secPreMovement)/settings.movWinShift);
-            [train, val, test] = splittingData(Psd,settings,typeOfDataInput);
+            [train, val, test,settings] = splittingData(Psd,settings,typeOfDataInput, percRecalibration);
         elseif strcmpi(typeOfInput,'image')
             typeOfDataInput = 'image';
 %             fs = settings.eeg.fs;
@@ -33,7 +46,7 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
 %             %settings.nWindowsTrial = 1;
 %             settings.movwinLength = (settings.secPostMovement+settings.secPreMovement);
 %             settings.movwinShift = settings.windowShift;
-            [train, val, test] = splittingData(Psd,settings,typeOfDataInput);
+            [train, val, test, settings] = splittingData(Psd,settings,typeOfDataInput);
         end
     end
     

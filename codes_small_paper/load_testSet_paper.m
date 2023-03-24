@@ -1,22 +1,32 @@
-function testSet = load_testSet_paper(testSetPath,numSubject,settings)
+function testSet = load_testSet_paper(testSetPath,numSubject,settings,typeEMGData,skipEEG)
 
 disp(['Loading test set for subject ',num2str(numSubject)])
 
 
-loadName = ['testSet_subj',num2str(numSubject)];
-loadNameTest = [testSetPath,loadName,'_psd'];
-
-test = load(loadNameTest,'-mat');
-testSet.eeg.data = test.test.eeg;
-testSet.eeg.output = test.test.output;
+if ~skipEEG
+    loadNameEEG = ['testSet',num2str(numSubject),'_EEG'];
+    loadNameTest = [testSetPath,loadNameEEG];
+    
+    test = load(loadNameTest,'-mat');
+    testSet.eeg.data = test.testEEG.data;
+    testSet.eeg.output = test.testEEG.output;
+end
 
 
 if settings.emg.timeDomain
     loadNameTest = [testSetPath,loadName,'_time_EMGRaw'];
     test = load(loadNameTest,'-mat');
-    testSet.emg.data = test.test.emg;
-    testSet.emg.output = test.test.output;
+    testSet.emg.data = test.emg;
 else
-    testSet.emg.data = test.test.emg;
-    testSet.emg.output = test.test.output;
+    if strcmpi(typeEMGData, 'healthy')
+        loadNameEMG = ['testSet',num2str(numSubject),'_EMG'];
+    elseif strcmpi(typeEMGData, 'fatigue')
+        loadNameEMG = ['testSet',num2str(numSubject),'_EMG_att',num2str(fix(settings.emg.attenuation*100))];
+    elseif strcmpi(typeEMGData, 'paraplegic')
+        loadNameEMG = ['testSet',num2str(numSubject),'_EMG_att',num2str(settings.emg.snr),'.mat'];      
+    end
+    loadNameTest = [testSetPath,loadNameEMG];
+    test = load(loadNameTest,'-mat');    
+    testSet.emg.data = test.testEMG.data;
+    testSet.emg.output = test.testEMG.output;
 end

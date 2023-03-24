@@ -1,0 +1,71 @@
+function testSet = load_testSet_paper(testSetPath,numSubject,settings,typeEMGData,skipEEG)
+
+disp(['Loading test set for subject ',num2str(numSubject)])
+
+
+if ~skipEEG
+%     loadNameEEG = ['testSetEEG',num2str(numSubject)];
+%     loadNameTest = [testSetPath,loadNameEEG];
+
+    classes = 1:11;
+    stt.classes = classes;    
+    dataType = 'EEG';
+    [train, val, test, stt] = preparingALLtheInputsAndOutputs(numSubject,classes,'psd','sequence',dataType);
+
+    stt.NumEMG = 0;
+    stt.NumEEG = 35;
+    choosenClasses = 1:11;
+    idxFinal = [];
+    [train, val, test, stt] = divide_EEG_EMG_half_time(train, val, test, stt,idxFinal,choosenClasses);
+    [~, ~, test, stt] = microToMacroClasses(train,val,test,stt); 
+    
+    %test = load(loadNameTest,'-mat');
+    testSet.eeg.data = test.test.eeg;
+    testSet.eeg.output = test.test.output;
+end
+
+
+if settings.emg.timeDomain
+    loadNameTest = [testSetPath,loadName,'_time_EMGRaw'];
+    test = load(loadNameTest,'-mat');
+    testSet.emg.data = test.test.emg;
+else
+    classes = 1:11;
+    stt.classes = classes;    
+    dataType = 'EMG';
+    stt.NumEMG = 0;
+    stt.NumEEG = 6;
+    choosenClasses = 1:11;
+
+    if strcmpi(typeEMGData, 'healthy')
+%         loadNameEMG = ['testSetEMG_healthy',num2str(numSubject)];
+%         loadNameTest = [testSetPath,'healthy/',loadNameEMG];
+%         test = load(loadNameTest,'-mat');
+        [train, val, test, stt] = preparingALLtheInputsAndOutputs(numSubject,classes,'psd','sequence',dataType);
+        [train, val, test, stt] = divide_EEG_EMG_half_time(train, val, test, stt,idxFinal,choosenClasses);
+        [~, ~, test, ~] = microToMacroClasses(train,val,test,stt); 
+    
+        testSet.emg.data = test.test.emg;
+        testSet.emg.output = test.test.output;
+    elseif strcmpi(typeEMGData, 'fatigue')
+%         loadNameEMG = ['testSetEMG_',num2str(numSubject),'_att',num2str(fix(settings.emg.attenuation*100))];
+%         loadNameTest = [testSetPath,'fatigue/',loadNameEMG];
+%         test = load(loadNameTest,'-mat');
+        [train, val, test, stt] = preparingALLtheInputsAndOutputs(numSubject,classes,'psd','sequence',dataType,settings.emg.attenuation);
+        [train, val, test, stt] = divide_EEG_EMG_half_time(train, val, test, stt,idxFinal,choosenClasses);
+        [~, ~, test, ~] = microToMacroClasses(train,val,test,stt); 
+
+        testSet.emg.data = test.test.emg;
+        testSet.emg.output = test.test.output;
+    elseif strcmpi(typeEMGData, 'paraplegic')
+%         loadNameEMG = ['testSetEMG',num2str(numSubject),'_snr',num2str(settings.emg.snr),'.mat'];
+%         loadNameTest = [testSetPath,'paraplegic/',loadNameEMG];
+%         test = load(loadNameTest,'-mat');
+        [train, val, test, stt] = preparingALLtheInputsAndOutputs(numSubject,classes,'psd','sequence',dataType,[],settings.emg.snr);
+        [train, val, test, stt] = divide_EEG_EMG_half_time(train, val, test, stt,idxFinal,choosenClasses);
+        [~, ~, test, ~] = microToMacroClasses(train,val,test,stt); 
+
+        testSet.emg.data = test.test.emg;
+        testSet.emg.output = test.test.output;        
+    end
+end

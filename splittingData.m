@@ -1,4 +1,4 @@
-function [train, validation, test] = splittingData(data,settings,type)
+function [train, validation, test, settings] = splittingData(data,settings,type, percRecalibration)
 
 num = data.triggers.num;
 windowsLabel = data.windowsLabel;
@@ -13,17 +13,22 @@ else                           % Frequency (PSD) domain
     allSxx = permute(Sxx,[3,2,4,1]);
 end
 
-nameFile = ['/home/palatella/workspace/idxTrainValTest25Hz_',num2str(settings.numSubject),'.mat'];
+perc = percRecalibration;
+%nameFile = ['/home/palatella/workspace/idxTrainValTest25Hz_',num2str(settings.numSubject),'.mat'];
+nameFile = ['/home/palatella/workspace/palatella_datasets/imagery dataset/idxTrainValTest25Hz_',num2str(settings.numSubject),'_p',num2str(perc),'.mat'];
 if isfile(nameFile)
-    load(['/home/palatella/workspace/idxTrainValTest25Hz_',num2str(settings.numSubject)])    
+    load(nameFile)    
 else
-    [idxTrain,idxVal,idxTest,onsetNum] = chooseIndices(windowsLabel,settings,nSamples,type);
+    [~,~,~,onsetNum] = chooseIndices(windowsLabel,settings,nSamples,type);
+    disp('Creating new indeces')
+    perc = perc/100;
+    [idxTrain, idxVal, idxTest] = recreateIndicesForSessions(onsetNum, perc);
     save(nameFile,'idxTrain',"idxTest","idxVal","onsetNum")  
 end
 
-%disp('creating the input matrix')
+disp('creating the input matrix')
 
-if size(allSxx,1) > 7
+if size(allSxx,1) < 8
     nMonWinSize = settings.movWinLength/settings.windowShift;
     nMonWinShift = settings.movWinShift/settings.windowShift;
     idxWindows = nMonWinSize:nMonWinShift:nSamples;
@@ -33,6 +38,8 @@ if size(allSxx,1) > 7
     idxChanges = find(diffSeq_O~=0)+1;
     onsetNum = [seq_O(idxChanges) idxChanges];
 end
+    
+
 
 if strcmpi(type,'sequence')
     [train.input, train.output] = createInputOutputMatrices(allSxx, idxTrain, onsetNum, settings);

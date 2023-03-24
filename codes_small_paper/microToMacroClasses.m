@@ -1,5 +1,6 @@
 function [train, val, test, settings] = microToMacroClasses(train,val,test,settings)
 
+%train.output(isnan(train.output)) = 0;
 train.output = double(train.output);
 val.output = double(val.output);
 test.output = double(test.output);

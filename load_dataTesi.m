@@ -1,6 +1,8 @@
 function [data, marker, channels] = load_dataTesi(subject,signal,session,movement)
 
-loadName = [signal,'_session',num2str(session),'_sub',int2str(subject),'_',movement,'_realMove.mat'];
+%loadName = [signal,'_session',num2str(session),'_sub',int2str(subject),'_',movement,'_realMove.mat'];
+loadName = ['/home/palatella/workspace/palatella_datasets/imagery dataset/',signal,'_session',num2str(session),'_sub',int2str(subject),'_',movement,'_MI.mat'];
+
 
 load(loadName)
 

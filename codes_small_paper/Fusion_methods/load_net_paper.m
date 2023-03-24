@@ -1,31 +1,41 @@
-function net = load_net_paper(netPath,numSubject,dataType,settings)
+function net = load_net_paper(netPath,numSubject,dataType,settings,endNameEEG)
 
 disp(['Loading ',dataType,' net for subject ',num2str(numSubject)])
 
-isMacro = settings.macro;
+if nargin<5,    endNameEEG = '';    end
 
-loadName = [netPath,'nn_'];
+%isMacro = settings.macro;
+
+%loadName = [netPath,'nn_'];
 
 
 if strcmpi(dataType,'EEG')
-    loadName = [loadName,'CNN_2LSTM_EEG_'];
-    isTime = false;
-else
-    loadName = [loadName,'2LSTM_EMG_'];
-    isTime = settings.timeDomain;
-end
-
-if isMacro,     loadName = [loadName,'macro_'];     end
-if isTime && strcmpi(dataType,'EMG'),      loadName = [loadName,'timeRaw_'];   end
-
-loadName = [loadName,'subj',num2str(numSubject)];
-
-
-if nargout>0
-    net = load(loadName,'net','confMatrix');   
-else 
+    loadName = [netPath,'nn_CNN_2LSTM_EEG_macro_subj',num2str(numSubject),endNameEEG];
     net = load(loadName);
     return
 end
+    
+
+% loadName = [netPath,'EMG filtered 25 Hz/',settings.type,'/'];
+loadName = [netPath];
+
+if strcmpi(settings.type,'healthy')
+    net = load([loadName,'nn_2LSTM_EMG_macro_subj',num2str(numSubject),'_25Hz_raw']);
+elseif strcmpi(settings.type,'fatigue')
+    net = load([loadName,'nn_2LSTM_EMG_macro_subj',num2str(numSubject),'_smaller_attenuation',num2str(fix(settings.attenuation*100))]);
+elseif strcmpi(settings.type,'paraplegic')
+    net = load([loadName,'nn_2LSTM_EMG_macro_subj',num2str(numSubject),'smaller_25Hz_raw_snr',num2str(settings.snr),'.mat']);
+end
+
+
+% loadName = [loadName,'subj',num2str(numSubject)];
+% 
+% 
+% if nargout>0
+%     net = load(loadName,'net','confMatrix');   
+% else 
+%     net = load(loadName);
+%     return
+% end
 
 

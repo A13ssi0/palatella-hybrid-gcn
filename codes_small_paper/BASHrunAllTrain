@@ -1,0 +1,5 @@
+for perc in 0
+do
+	CUDA_VISIBLE_DEVICES=2 matlab -nodisplay -nojvm -r 'runCompleteTrain('$perc'); quit' | tail -n +10
+done
+

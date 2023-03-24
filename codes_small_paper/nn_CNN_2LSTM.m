@@ -1,43 +1,36 @@
-function [net, info, confMatrix, class, pred, accuracyThresholds] = nn_CNN_2LSTM(subject, train,val,test,settings,savingPath,isMacro,dataType)
+function [net, info] = nn_CNN_2LSTM(subject, train,val,test,settings,savingPath,isMacro,dataType)
 
     if ~exist("isMacro",'var'), isMacro = false; end
 
     startingName = ['nn_CNN_2LSTM_',dataType,'_'];
-    if isMacro,     startingName = [startingName, 'macro_'];   end
+    if isMacro,     startingName = [startingName, 'macro_'];   settings.numClasses = 3; end
     
     disp(['Training ',startingName,' for subject ',num2str(subject)]);
-     
-    if strcmp(dataType,'EEG')
-        train.input = train.eeg;
-        val.input = val.eeg;
-        test.input = test.eeg;
-        settings.inputSize = size(train.input{1},1:3);
-    else
-        train.input = train.emg;
-        val.input = val.emg;
-        test.input = test.emg;
-        settings.inputSize = size(train.input{1},1:3);
-    end
+
+    train.input = train.eeg;
+    val.input = val.eeg;
+    test.input = test.eeg;
+    settings.inputSize = size(train.input{1},1:3);
 
 
-    [net, info, confMatrix, class, pred, accuracyThresholds, probPredValidation] = CNN_2LSTM(settings, train.input, train.output, val.input, val.output,  test.input, test.output);
+    [net, info, probPredValidation] = CNN_2LSTM(settings, train.input, train.output, val.input, val.output);
 
     trueValOutput = val.output;
     trueTestOutput = test.output;
     if exist('savingPath','var')
-        savingName = [savingPath,startingName,'subj',num2str(subject)];
-        save(savingName,'net','info','confMatrix','class','pred','accuracyThresholds','settings','trueTestOutput','probPredValidation','trueValOutput','-v7.3');
+        savingName = [savingPath,startingName,'subj',num2str(subject),'_smaller'];
+        save(savingName,'net','info','settings','trueTestOutput','probPredValidation','trueValOutput','-v7.3');
     end
 
 end
 
 
-function [net, info, confMatrix, class, pred, accuracyThresholds, probPredValidation] = CNN_2LSTM(settings, inputTrain, outputTrain, inputVal, outputVal, inputTest, outputTest)
+function [net, info, probPredValidation] = CNN_2LSTM(settings, inputTrain, outputTrain, inputVal, outputVal)
 
    filterSize = 3;
    numFilters = 32; 
-   dropOut = 0.1;
-   hiddenUnitsLSTM = [250 100];
+   dropOut = 0.3;
+   hiddenUnitsLSTM = [200 100];
 
    lgraph = layerGraph([
         sequenceInputLayer(settings.inputSize,'Name','input','Normalization','zscore','NormalizationDimension','element')
@@ -60,15 +53,15 @@ function [net, info, confMatrix, class, pred, accuracyThresholds, probPredValida
     lgraph = connectLayers(lgraph,'foldCNN/miniBatchSize','unfoldCNN/miniBatchSize');
 
 
-    miniBatchSize = 512;
+    miniBatchSize = 512/2;
     validationFrequency = floor(numel(outputTrain)/miniBatchSize);
     options = trainingOptions('adam', ...
         'MiniBatchSize',miniBatchSize, ...
-        'MaxEpochs',15, ...
+        'MaxEpochs',3, ...
         'InitialLearnRate',1e-2, ...
         'LearnRateSchedule','piecewise', ...
         'LearnRateDropFactor',1e-1, ...
-        'LearnRateDropPeriod',4, ...
+        'LearnRateDropPeriod',2, ...
         'Shuffle', 'once', ...
         'ValidationFrequency',validationFrequency, ...
         'Verbose',false, ...
@@ -84,8 +77,8 @@ function [net, info, confMatrix, class, pred, accuracyThresholds, probPredValida
     probPredValidation = predict(net, inputVal);
 
     % Prediction and confusion matrix
-    [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings);
-    accuracyThresholds = nan;
+    %[confMatrix, class, pred] = trial_predict(net, inputVal, outputVal, settings);
+    %accuracyThresholds = nan;
     %accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings);
 
 end

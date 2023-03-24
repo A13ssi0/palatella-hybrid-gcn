@@ -2,39 +2,23 @@ close all; clearvars; clc;
 
 subjects = [7 11 15 19 23];
 
-%attenuation = [0.1 0.5 0.7 0.9];
-%subjects = 7;
+%attenuation = [0.7 0.9];
+signalToNoiseRatio = [1 0.5 0.1];
 
-savingPathHeal='/home/palatella/workspace/palatella_net/netSmallPaper/filtered 25 Hz/healthy/';
-savingPathFat='/home/palatella/workspace/palatella_net/netSmallPaper/filtered 25 Hz/fatigue/';
-
-savingPath = '/home/palatella/workspace/palatella_net/netSmallPaper/';
+%savingPath = '/home/palatella/workspace/palatella_net/netSmallPaper/only grasping/';
+savingPath = '/home/palatella/workspace/palatella_datasets/imagery dataset/15 perc/';
 
 
 %%
 
 for numSubject = subjects
 
-  isTime = false;
+    trainEEG(numSubject, savingPath)
 
-  isMacro = false;
-  classes = 1:11;
-  settings.classes = classes;
-  [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'psd','sequence');
+    for snr = signalToNoiseRatio
 
-  [train, val, test, settings] = divide_EEG_EMG_half_time(train, val, test, settings);
-  
-  %dataType = 'EEG';
-  %nn_CNN_2LSTM(numSubject, train,val,test,settings,savingPath,isMacro,dataType);
-  %dataType = 'EMG';
-  %nn_2LSTM(numSubject, train,val,test,settings,savingPath,isMacro,dataType,isTime);
+        doAttenuation = false;
+        trainEMG(numSubject, savingPath, doAttenuation, snr);
 
-  [train, val, test, settings] = microToMacroClasses(train,val,test,settings);  
-  
-  isMacro = true;     
-  dataType = 'EEG';
-  nn_CNN_2LSTM(numSubject, train,val,test,settings,savingPath,isMacro,dataType);
-%   dataType = 'EMG';
-%   nn_2LSTM(numSubject, train,val,test,settings,savingPath,isMacro,dataType,isTime,true);
-    
+    end
 end

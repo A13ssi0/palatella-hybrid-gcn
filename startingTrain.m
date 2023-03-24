@@ -11,6 +11,8 @@ end
 
 load(filename)
 
+%channelsEEG = PSD.settings.eeg.preprocessing.channelSubset;
+
 if contains(filename,'labeled')
     data = subjLabeled;
     settings = data.settings;
