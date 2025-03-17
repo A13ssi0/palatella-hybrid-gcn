@@ -1,15 +1,21 @@
 %%
 close all; clearvars; clc;
 
-savingPath = '/home/palatella/workspace/palatella_datasets/imagery dataset/'; 
+%%
+subject = 4;
+dataType = 'realMove'; % either 'realMove' or 'MI' TODO: check safety
+dataPath = '/home/palatella/workspace/palatella_datasets/';
+% savingPath = ['/home/palatella/workspace/palatella_datasets/sub',num2str(subject),'/preprocessed/'];
+savingPath = [dataPath,'preprocessed/'];
 
-subject = 7;
-sessions = [1];
+ICA_outfile = [savingPath,'subj',num2str(subject),'_fullDataset.mat'];
+ICA_pruned_outfile = [savingPath,'subj',num2str(subject),'_pruned.mat'];
 
+%% Settings
+
+sessions = [1 2 3];
 secStartStop = 10;    % Set an offset for the trial extraction. The marker would be zero when the trial start
                       % Doing so other 10 second before it is taken
-%% Settings
-savingName = [savingPath,'subj',num2str(subject),'_fullDataset.mat'];
 
 subj.numSubject = subject;
 subj.settings.downsampling = 5;
@@ -46,12 +52,18 @@ markerType = [];
 EEG = [];
 EMG = [];
 
-disp('concatenating data')
+disp(['Concatenating data (dataset type: ',dataType,')'])
 for i = sessions
     for j = 1:length(movement)
         mov = movement{j};
+
+        EEG_filename = [dataPath,'EEG_ConvertedData/EEG_session',...
+           num2str(i),'_sub',int2str(subject),'_',mov,'_',dataType,'.mat'];
+        EMG_filename = [dataPath,'EMG_ConvertedData/EMG_session',...
+           num2str(i),'_sub',int2str(subject),'_',mov,'_',dataType,'.mat'];
+
         disp(['session: ',num2str(i),'  ',mov,'  EEG'])
-        [data, marker] = load_dataTesi(subject,'EEG',i,mov);
+        [data, marker] = load_dataTesi(EEG_filename);
 
         classOneHot = marker.y;
         className = marker.className;
@@ -68,11 +80,11 @@ for i = sessions
         tEEG = downsample(data(start:stop,:),scaleDownsample);
         EEG = [EEG ; tEEG];
 
-%         disp(['session: ',num2str(i),'  ',mov,'  EMG'])
-%         [data, ~] = load_dataTesi(subject,'EMG',i,mov);
-%        
-%         tEMG = downsample(data(start:stop,:),scaleDownsample);
-%         EMG = [EMG ; tEMG];
+        disp(['session: ',num2str(i),'  ',mov,'  EMG'])
+        [data, ~] = load_dataTesi(EMG_filename);
+       
+        tEMG = downsample(data(start:stop,:),scaleDownsample);
+        EMG = [EMG ; tEMG];
     end
 end
 
@@ -91,6 +103,7 @@ subj.triggers = trigger;
 
 %% Filtering
 disp('Filtering EEG')
+
 fs = subj.settings.eeg.fs;
 
 fc_l = 1;   fc_h = 40;
@@ -110,20 +123,20 @@ for i = 1:size(EEG,2)
     EEG(:,i) = filtfilt(b,a,EEG(:,i)); 
 end
 
-% disp('Filtering EMG')
-% fc_l = 5;
-% order = 4;
-% 
-% subj.settings.emg.preprocessing.HP_cutoff = fc_l;
-% subj.settings.emg.preprocessing.order = order;
-% 
-% for i = 1:size(EMG,2)
-%     % High pass filtering @1 Hz
-%     [b,a] = butter(order,fc_l/(fs/2),'high');
-%     EMG(:,i) = filtfilt(b,a,EMG(:,i)); 
-% end 
+disp('Filtering EMG')
+fc_l = 5;
+order = 4;
 
-clearvars -except EEG EMG subj savingName
+subj.settings.emg.preprocessing.HP_cutoff = fc_l;
+subj.settings.emg.preprocessing.order = order;
+
+for i = 1:size(EMG,2)
+    % High pass filtering @1 Hz
+    [b,a] = butter(order,fc_l/(fs/2),'high');
+    EMG(:,i) = filtfilt(b,a,EMG(:,i)); 
+end 
+
+clearvars -except EEG EMG subj ICA_outfile ICA_pruned_outfile
 
 %% Find Electrodes to Keep and Deleting the others
 disp('Deleting Electrodes')
@@ -145,20 +158,20 @@ subj.settings.eeg.preprocessing.channelSubset = labels(idx_good);
 subj.eeg = pop_select(subj.eeg, 'channel', subj.settings.eeg.preprocessing.channelSubset);
 subj.eeg.data = double(subj.eeg.data);
 
-% labels = struct2cell(chanlocs7);
-% labels = squeeze(labels(3,1,:));
-% delete= {'7'};
-% idx = zeros(length(labels),1);
-% for i=1:length(delete)
-%     idx = idx + contains(upper(labels),delete(i));
-% end
-% idx_good = idx==0;
-% subj.settings.emg.preprocessing.channelSubset = labels(idx_good);
-% subj.emg = pop_select(subj.emg, 'channel', subj.settings.emg.preprocessing.channelSubset);
-% subj.emg.data = double(subj.emg.data);
-% subj.settings.NumEMG = 6;
+labels = struct2cell(chanlocs7);
+labels = squeeze(labels(3,1,:));
+delete= {'7'};
+idx = zeros(length(labels),1);
+for i=1:length(delete)
+    idx = idx + contains(upper(labels),delete(i));
+end
+idx_good = idx==0;
+subj.settings.emg.preprocessing.channelSubset = labels(idx_good);
+subj.emg = pop_select(subj.emg, 'channel', subj.settings.emg.preprocessing.channelSubset);
+subj.emg.data = double(subj.emg.data);
+subj.settings.NumEMG = 6;
 
-clearvars -except subj savingName
+clearvars -except subj ICA_outfile ICA_pruned_outfile
 
 %% Re-referencing And Interpolating
 disp('Re-referencing And Interpolating FCz')
@@ -172,36 +185,39 @@ subj.eeg.chanlocs = chanlocs35;
 subj.eeg.nbchan = 35;
 subj.settings.NumEEG = subj.eeg.nbchan;
 
-% %% ASR
-% subj.eeg = compute_asr(subj.eeg, subj.settings);
-% subj.settings.doneASR = 'yes';
+%% ASR
+disp('ASR step')
+subj.eeg = compute_asr(subj.eeg, subj.settings);
+subj.settings.doneASR = 'yes';
 % save(savingName, 'subj','-v7.3');
-% 
-% 
-% %% CCA
-% subj.eeg = compute_cca(subj.eeg, subj.settings);
-% subj.settings.doneCCA = 'yes';
+
+
+%% CCA
+disp('CCA step')
+subj.eeg = compute_cca(subj.eeg, subj.settings);
+subj.settings.doneCCA = 'yes';
 % save(savingName, 'subj','-v7.3');
-% 
-% %% ICA
-% subj.eeg = compute_ica(subj.eeg, subj.settings);
-% subj.settings.doneICA = 'yes';
-% save(savingName, 'subj','-v7.3');
-% 
-% %% IC selection
+
+%% ICA
+disp('ICA step')
+subj.eeg = compute_ica(subj.eeg, subj.settings);
+subj.settings.doneICA = 'yes';
+save(ICA_outfile, 'subj','-v7.3');
+
+%% IC selection
 % savingName = [savingPath,'subj',num2str(subject),'_pruned.mat'];
+% load('/home/palatella/workspace/palatella_datasets/preprocessed/subj4_fullDataset.mat');
+load(ICA_outfile)
+EEG1 = compute_extractepochs(subj);
+EEG1.icaact = geticaact(EEG1);
+EEG1 = iclabel(EEG1);
+[art_comps] = ADJUST(EEG1,'report.txt');
+pop_viewprops(EEG1, 0);
 % 
-% EEG1 = compute_extractepochs(subj);
-% EEG1.icaact = geticaact(EEG1);
-% EEG1 = iclabel(EEG1);
-% [art_comps] = ADJUST(EEG1,'report.txt');
-% pop_viewprops(EEG1, 0);
-% % 
-% subj.eeg.icaact = geticaact(subj.eeg);
-% prompt = 'Enter the components to remove:\n';
-% rm_comps = (str2num(input(prompt, "s")))';
-% subj.eeg = pop_subcomp(subj.eeg,rm_comps);
-save(savingName, 'subj','-v7.3')
-%   save(sprintf(savingName, subj,'-v7.3'));
+subj.eeg.icaact = geticaact(subj.eeg);
+prompt = 'Enter the components to remove:\n';
+rm_comps = (str2num(input(prompt, "s")))';
+subj.eeg = pop_subcomp(subj.eeg,rm_comps);
+save(ICA_pruned_outfile, 'subj','-v7.3')
 
 

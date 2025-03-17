@@ -1,10 +1,9 @@
-function [data, marker, channels] = load_dataTesi(subject,signal,session,movement)
+function [data, marker, channels] = load_dataTesi(filename)
 
-%loadName = [signal,'_session',num2str(session),'_sub',int2str(subject),'_',movement,'_realMove.mat'];
-loadName = ['/home/palatella/workspace/palatella_datasets/imagery dataset/',signal,'_session',num2str(session),'_sub',int2str(subject),'_',movement,'_MI.mat'];
+%loadName =
+%[signal,'_session',num2str(session),'_sub',int2str(subject),'_',movement,'_realMove.mat'];clear
 
-
-load(loadName)
+load(filename)
 
 channels = mnt.clab;
 n_electrodes = length(channels);

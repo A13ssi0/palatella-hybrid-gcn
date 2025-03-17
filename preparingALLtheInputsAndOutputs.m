@@ -1,4 +1,4 @@
-function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,typeOfData, typeOfInput,typeOfSignal,snr, attenuation, percRecalibration)
+function [data, settings] = preparingALLtheInputsAndOutputs(filename,classes,typeOfData, typeOfInput,  percRecalibration)
 
     NumHiddenUnits = 150;
     NumOutFeatures = 42;
@@ -8,83 +8,57 @@ function [train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubje
     cutLowFreq = 8;
     cutHighFreq = 30;
 
-
-    % importings PSD -------------------------------------------------------------------------------
+    % importing PSD -------------------------------------------------------------------------------
     if strcmpi(typeOfData,'psd')
-        disp(['Importing the PSD of subject ',num2str(numSubject)])
-        if strcmpi(typeOfSignal,'EEG')
-            filenamePSD = ['subj',num2str(numSubject),'_psd_corrected.mat'];
-            %filenamePSD = ['/home/palatella/workspace/palatella_datasets/imagery dataset/s7_imagery'];
-        else
-            if exist('attenuation','var') && ~isempty(attenuation)
-                filenamePSD = ['/home/palatella/workspace/palatella_datasets/only emg/fatigue/'];
-                filenamePSD = [filenamePSD,'s',num2str(numSubject),'_wind25Hz_raw_attenuation',num2str(fix(attenuation*100))];
-            elseif exist('snr','var') && ~isempty(snr)
-            %if exist('snr','var') && ~isempty(snr)
-                filenamePSD = ['s',num2str(numSubject),'_wind25Hz_raw_snr',num2str(snr),'.mat'];
-                filenamePSD = ['/home/palatella/workspace/palatella_datasets/only emg/paraplegic/',filenamePSD];
-            else
-                filenamePSD = ['s',num2str(numSubject),'_wind25Hz_raw'];
-                filenamePSD = ['/home/palatella/workspace/palatella_datasets/only emg/healthy/',filenamePSD];
-            end
-        end
-        [Psd,settings] = startingTrain(filenamePSD,classes);
+        disp('Loading');
+        [data,settings] = startingTrain(filename,classes);
 
-        settings.numSubject = numSubject;
-    
-        disp(['Splitting the PSD of subject ',num2str(numSubject)])
+        disp('Splitting');
         if strcmpi(typeOfInput,'sequence')
-            typeOfDataInput = 'sequence';
             settings.movWinLength = 2*settings.windowLength; % [s]
             settings.movWinShift = 2*settings.windowShift; % [s]
             settings.nWindowsTrial = fix((settings.secPostMovement+settings.secPreMovement)/settings.movWinShift);
-            [train, val, test,settings] = splittingData(Psd,settings,typeOfDataInput, percRecalibration);
         elseif strcmpi(typeOfInput,'image')
-            typeOfDataInput = 'image';
 %             fs = settings.eeg.fs;
 %             settings.windowShift = 1/fs;
 %             %settings.nWindowsTrial = 1;
 %             settings.movwinLength = (settings.secPostMovement+settings.secPreMovement);
 %             settings.movwinShift = settings.windowShift;
-            [train, val, test, settings] = splittingData(Psd,settings,typeOfDataInput);
         end
     end
     
     % importings time -------------------------------------------------------------------------------
     if strcmpi(typeOfData,'time')
-        disp(['importing and splitting the time series of subject ',num2str(numSubject)])
-        filenameTime = ['subj',num2str(numSubject),'_labeledRaw.mat'];
-        [timeSeries,settings] = startingTrain(filenameTime,classes);
+        disp('Loading');
+        [data,settings] = startingTrain(filename,classes);
         fs = settings.eeg.fs;
     
         [b,a] = butter(4,cutLowFreq/(fs/2),'high');
         [d,c] = butter(4,cutHighFreq/(fs/2),'low');
         for i = 1:settings.NumEEG
-            timeSeries.data(i,:) = filtfilt(b,a,double(timeSeries.data(i,:))); 
-            timeSeries.data(i,:) = filtfilt(d,c,double(timeSeries.data(i,:)));  
+            data.data(i,:) = filtfilt(b,a,double(data.data(i,:))); 
+            data.data(i,:) = filtfilt(d,c,double(data.data(i,:)));  
         end
-    
+        
+        disp('Splitting');
         if strcmpi(typeOfInput,'sequence')
-            typeOfDataInput = 'sequence';
             settings.windowShift = 1/fs;
             settings.movWinLength = 1;
             settings.movWinShift = 0.04; 
             settings.nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/settings.movWinShift;
-            [train, val, test] = splittingData(timeSeries,settings,typeOfDataInput);
+            
         elseif strcmpi(typeOfInput,'image')
             settings.windowShift = 1/fs;
-            %settings.nWindowsTrial = 1;
-            typeOfDataInput = 'image';
-            [train, val, test] = splittingData(timeSeries,settings,typeOfDataInput);
+            settings.nWindowsTrial = 1;
         end
     end
 
     % importings features -------------------------------------------------------------------------------
     if strcmpi(typeOfData,'features')
-        disp(['importing and splitting the features of subject ',num2str(numSubject)])
-        filenameFeat = ['subj',num2str(numSubject),'_featuresEMG.mat'];
-        [train,test,settings] = startingSplittingFeatures(filenameFeat,classes);
+        disp('Loading and splitting');
+        [train,test,settings] = startingSplittingFeatures(filename,classes);
         val = [];
+        data = [train,val,test];
     end
 
 

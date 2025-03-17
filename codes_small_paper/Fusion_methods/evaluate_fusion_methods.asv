@@ -4,82 +4,170 @@ close all; clearvars; clc;
 %testSetPath = '/home/palatella/workspace/palatella_datasets/test set for small paper/';
 %subjects = [7 11 13 23 29];
 
-netPath = '/home/palatella/workspace/palatella_datasets/imagery dataset/';
+netPath = '/home/palatella/workspace/palatella_datasets/imagery dataset/weighted train/';
 testSetPath = '/home/palatella/workspace/palatella_datasets/imagery dataset/testSets/';
 
 idxLessElectrodesPath = '/home/palatella/workspace/palatella_net/netSmallPaper/idxEEGChannelsLessElectrodes';
 
 
-subjects = [7 11 15 19 23]; %7
+subjects = [11 7 15 19 23]; %7
 netSettings.eeg.macro = true;
 netSettings.eeg.deleteElectrodes = false;
 
 
 netSettings.emg.macro = true;
 netSettings.emg.timeDomain = false;
-netSettings.emg.attenuation = 0.9; %[0.7 0.9]
+netSettings.emg.attenuation = 0.7; %[0.7 0.9]
 netSettings.emg.snr = 1; %[1 0.5 0.1]
 %netSettings.emg.type = 'paraplegic';
 
 %perc = 10;
 skipEEG = false;
-percentual = [15 10 5 0];
+percentual = [1];
 
 %%
-for att = [0.9 0.7  1 0.5 0.1]
+for att = 0.7%[0.9 0.7 1 0.5 0.1] %[0.9 0.7]
 
-if att>0.5
-    netSettings.emg.attenuation = att;
-    netSettings.emg.type = 'fatigue';
-else
-    netSettings.emg.snr = att;
-    netSettings.emg.type = 'paraplegic';
-end
+    if att>0.5 && att<1
+        netSettings.emg.attenuation = att;
+        netSettings.emg.type = 'fatigue';
+        k = fix(att*100);
+    else
+        netSettings.emg.snr = att;
+        netSettings.emg.type = 'paraplegic';
+        k = att;
+    end
+    
+%     finalResults = nan(length(subjects),5,length(percentual));
+%     f1Score = finalResults;
+%     loss = finalResults;
+%     cmRes = cell(length(subjects),5,length(percentual));
+%     sensitivity = finalResults;
+%     precision = finalResults;
+    
+    for q = 1:length(percentual)
+    
+        perc = percentual(q);
+        folderName = [num2str(perc) ' perc/'];
+        
+        netPathP = [netPath folderName];
+        testSetPathP = [testSetPath folderName];
+        netPathEEG = netPathP;
+        netPathEMG = netPathP;
+        
+        for i = 1:length(subjects)
+        
+            numSubject = subjects(i);
+        
+            testSet = load_testSet_paper(testSetPathP,numSubject,netSettings,netSettings.emg.type,skipEEG);
+            testSet.emg.data = deleteSeventhChannel(testSet.emg.data);
+            if netSettings.eeg.deleteElectrodes,    testSet.eeg.data = deleteExtraElectrodes(testSet.eeg.data,idxLessElectrodesPath);   end
+        
+            EEGNet = load_net_paper(netPathEEG,numSubject,'EEG',netSettings.eeg,'_smaller');
+            EMGNet = load_net_paper(netPathEMG,numSubject,'EMG',netSettings.emg);
 
-finalResults = nan(length(subjects),5,length(percentual));
-f1Score = finalResults;
 
-for q = 1:length(percentual)
+%%
+%             EEGNet.probPredValidation = predict(EEGNet.net,val.input);
+%             p = microToMacroClasses(val,val,val);
+%             EEGNet.trueValOutput = p.output;
+            EEGNet.CMval = extract_net_performances(EEGNet.probPredValidation,EEGNet.trueValOutput);
+            EMGNet.CMval = extract_net_performances(EMGNet.probPredValidation,EMGNet.trueValOutput);
+        
+            results = mergingNetsWithFusionMethods(EEGNet,EMGNet,testSet);
+%         
+%             finalResults(i,:,q) = 100*[results.eeg.accuracy,results.emg.accuracy,results.naive.accuracy,results.bayesian.accuracy,results.fuzzy.accuracy];
+%             f1Score(i,:,q) = [results.eeg.f1,results.emg.f1,results.naive.f1,results.bayesian.f1,results.fuzzy.f1];  
+%             loss(i,:,q) = [results.eeg.loss,results.emg.loss,results.naive.loss,results.bayesian.loss,results.fuzzy.loss];  
+%             sensitivity(i,:,q) = [results.eeg.sensitivity,results.emg.sensitivity,results.naive.sensitivity,results.bayesian.sensitivity,results.fuzzy.sensitivity];   
+%             precision(i,:,q) = [results.eeg.precision,results.emg.precision,results.naive.precision,results.bayesian.precision,results.fuzzy.precision];   
+%             cmRes(i,:,q) = {results.eeg.cm,results.emg.cm,results.naive.cm,results.bayesian.cm,results.fuzzy.cm};
 
-perc = percentual(q);
-folderName = [num2str(perc) ' perc/'];
+%%
 
-netPathP = [netPath folderName];
-testSetPathP = [testSetPath folderName];
-netPathEEG = netPathP;
-netPathEMG = netPathP;
+            movWinLen = 1;
+            movWinShift = 0.04;
+            nWindTrial = 50;
 
-for i = 1:length(subjects)
+            eegPred = predict(EEGNet.net,testSet.eeg.data)';
+            emgPred = predict(EMGNet.net,testSet.emg.data)';
 
-    numSubject = subjects(i);
 
-    testSet = load_testSet_paper(testSetPathP,numSubject,netSettings,netSettings.emg.type,skipEEG);
-    testSet.emg.data = deleteSeventhChannel(testSet.emg.data);
-    if netSettings.eeg.deleteElectrodes,    testSet.eeg.data = deleteExtraElectrodes(testSet.eeg.data,idxLessElectrodesPath);   end
+            output = double(testSet.eeg.output)';
 
-    EEGNet = load_net_paper(netPathEEG,numSubject,'EEG',netSettings.eeg,'_smaller');
-    EMGNet = load_net_paper(netPathEMG,numSubject,'EMG',netSettings.emg);
 
-    %EEGNet.probPredValidation = predict(EEGNet.net,val.input);
-    %p = microToMacroClasses(val,val,val);
-    %EEGNet.trueValOutput = p.output;
-    EEGNet.CMval = extract_net_performances(EEGNet.probPredValidation,EEGNet.trueValOutput);
-    EMGNet.CMval = extract_net_performances(EMGNet.probPredValidation,EMGNet.trueValOutput);
+            classes = repmat([1; 2; 3], 1, length(output));
+            probCorrectEEG = eegPred(classes==output)';
+            probCorrectEMG = emgPred(classes==output)';
 
-    results = mergingNetsWithFusionMethods(EEGNet,EMGNet,testSet);
+            probIncorrectEEG = reshape(eegPred(output~=classes),size(classes,1)-1,[]);
+            probIncorrectEMG = reshape(emgPred(output~=classes),size(classes,1)-1,[]);
 
-    finalResults(i,:,q) = [results.eeg.accuracy,results.emg.accuracy,results.naive.accuracy,results.bayesian.accuracy,results.fuzzy.accuracy];
-    f1Score(i,:,q) = [results.eeg.f1,results.emg.f1,results.naive.f1,results.bayesian.f1,results.fuzzy.f1];  
-end
+            eegDiff = reshape(probCorrectEEG-max(probIncorrectEEG),[],nWindTrial);
+            emgDiff = reshape(probCorrectEMG-max(probIncorrectEMG),[],nWindTrial);
 
-finalResults = 100*finalResults;
-meanResults = mean(finalResults);
-sdResults = std(finalResults);
 
-meanF1 = mean(f1Score);
-sdF1 = std(f1Score);
+            naiveScore = results.naive.score';
+            fuzzyScore = results.fuzzy.score';
+            probCorrectNaive = naiveScore(classes==output)';
+            probCorrectFuzzy = fuzzyScore(classes==output)';
 
-end
+            probIncorrectNaive = reshape(naiveScore(output~=classes),size(classes,1)-1,[]);
+            probIncorrectFuzzy = reshape(fuzzyScore(output~=classes),size(classes,1)-1,[]);
+
+            naiveDiff = reshape(probCorrectNaive-max(probIncorrectNaive),[],nWindTrial);
+            fuzzyDiff = reshape(probCorrectFuzzy-max(probIncorrectFuzzy),[],nWindTrial);
+
+
+
+            k = diff(output);
+            l = find(k~=0)/50;
+
+            limsData = [-1 1];
+            limsMerge = [-0.3 0.3];
+
+            topColor = [1 0 0];
+            middleColor = [1 1 1];
+            bottomColor = [0 0 1];
+
+            
+           
+            
+
+            figure
+            subplot(2,2,1),   imagesc(eegDiff>0), title('EEG hit acc:',num2str(sum(eegDiff>0,'all')/length(output))), colormap("gray")
+            subplot(2,2,2),   imagesc(emgDiff>0), title('EMG hitacc:',num2str(sum(emgDiff>0,'all')/length(output))), colormap("gray")
+            subplot(2,2,3),   imagesc(naiveDiff>0), title('Naive hit acc:',num2str(sum(naiveDiff>0,'all')/length(output))), colormap("gray")
+            subplot(2,2,4),   imagesc(fuzzyDiff>0), title('Fuzzy hit acc:',num2str(sum(fuzzyDiff>0,'all')/length(output))), colormap("gray")
+            sgtitle(['Subject ',num2str(numSubject),'   end reaching:',num2str(l(1)),'  end twisting:',num2str(l(2))])
+            set(gcf, 'Position', get(0,'ScreenSize'));
+
+            figure
+            subplot(2,2,1),   imagesc(eegDiff, limsData), title('EEG hit'), colormap('turbo'), colorbar
+            subplot(2,2,2),   imagesc(emgDiff, limsData), title('EMG hit'), colormap("turbo"), colorbar
+            subplot(2,2,3),   imagesc(naiveDiff, limsMerge), title('Naive hit'), colormap("turbo"), colorbar
+            subplot(2,2,4),   imagesc(fuzzyDiff, limsMerge), title('Fuzzy hit'), colormap("turbo"), colorbar
+            sgtitle(['Subject ',num2str(numSubject),'   end reaching:',num2str(l(1)),'  end twisting:',num2str(l(2))])
+            set(gcf, 'Position', get(0,'ScreenSize'));
+
+%%
+        end
+    
+    end
+   
+    
+%     save(['/home/palatella/workspace/palatella-hybrid-gcn/codes_small_paper/Fusion_methods/finalResults_Weighted_',netSettings.emg.type,num2str(k),'_perc1.mat'],"finalResults","f1Score","loss","cmRes","sensitivity","precision") 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 %%
 % figure
 % bar(1:5,meanResults), hold on

@@ -2,7 +2,7 @@ function net = trainEEG(numSubject, savingPath, percRecalibration)
 
 classes = 1:11;
 dataType = 'EEG';
-[train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'psd','sequence',dataType,[], percRecalibration);
+[train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'psd','sequence',dataType,[],[], percRecalibration);
 
 
 %   % channel selection

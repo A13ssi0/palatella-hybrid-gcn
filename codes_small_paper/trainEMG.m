@@ -2,7 +2,7 @@ function net = trainEMG(numSubject, savingPath, doAttenuation, snr, percRecalibr
 
 classes = 1:11;
 dataType = 'EMG';
-[train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'psd','sequence',dataType, snr, percRecalibration);
+[train, val, test, settings] = preparingALLtheInputsAndOutputs(numSubject,classes,'psd','sequence',dataType, snr, [], percRecalibration);
 
 settings.NumEMG = 6;
 settings.NumEEG = 0;

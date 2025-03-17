@@ -1,5 +1,8 @@
-for perc in 0
+for perc in 1
 do
-	CUDA_VISIBLE_DEVICES=2 matlab -nodisplay -nojvm -r 'runCompleteTrain('$perc'); quit' | tail -n +10
+	for subj in {15,19,23}
+	do
+		CUDA_VISIBLE_DEVICES=2 matlab -nodisplay -nojvm -r 'runCompleteTrain('$perc','$subj'); quit' | tail -n +10
+	done
 done
 

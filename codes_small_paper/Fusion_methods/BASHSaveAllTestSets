@@ -1,6 +1,6 @@
-for perc in {10,5,0}
+for perc in 1
 do
-	for sbj in {7,11,15,19,23}
+	for sbj in 23 #{7,11,15,19,23}
 	do
 
 		CUDA_VISIBLE_DEVICES=2 matlab -nodisplay -nojvm -r 'saveTestSet('$sbj','$perc'); quit' | tail -n +10

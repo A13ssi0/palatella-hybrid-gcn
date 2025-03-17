@@ -19,9 +19,9 @@ vl = [];        tst = [];
 if nargin==2 && percToTransfer > 0
 
     valNum = onsetNum(idxVal,1);
-    countVal = fix(histcounts(valNum)*percToTransfer);
+    countVal = ceil(histcounts(valNum)*percToTransfer);
     testNum = onsetNum(idxTest,1);
-    countTest = fix(histcounts(testNum)*percToTransfer);
+    countTest = ceil(histcounts(testNum)*percToTransfer);
 
     for c = 1:length(countTest)
         vl = [vl; find(valNum==c,countVal(c),'first')];

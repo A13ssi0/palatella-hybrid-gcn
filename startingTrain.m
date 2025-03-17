@@ -13,7 +13,7 @@ load(filename)
 
 %channelsEEG = PSD.settings.eeg.preprocessing.channelSubset;
 
-if contains(filename,'labeled')
+if contains(filename,'time')
     data = subjLabeled;
     settings = data.settings;
     settings.NumChannels = size(data.data,1);

@@ -1,4 +1,4 @@
-function [train, validation, test, settings] = splittingData(data,settings,type, percRecalibration)
+function [train, validation, test, settings] = splittingData(data, settings, type, percRecalibration)
 
 num = data.triggers.num;
 windowsLabel = data.windowsLabel;
@@ -13,6 +13,9 @@ else                           % Frequency (PSD) domain
     allSxx = permute(Sxx,[3,2,4,1]);
 end
 
+if ~exist('percRecalibration','var')
+    percRecalibration = 10;
+end
 perc = percRecalibration;
 %nameFile = ['/home/palatella/workspace/idxTrainValTest25Hz_',num2str(settings.numSubject),'.mat'];
 nameFile = ['/home/palatella/workspace/palatella_datasets/imagery dataset/idxTrainValTest25Hz_',num2str(settings.numSubject),'_p',num2str(perc),'.mat'];
@@ -20,11 +23,15 @@ if isfile(nameFile)
     load(nameFile)    
 else
     [~,~,~,onsetNum] = chooseIndices(windowsLabel,settings,nSamples,type);
-    disp('Creating new indeces')
+    disp('Creating new indices')
     perc = perc/100;
     [idxTrain, idxVal, idxTest] = recreateIndicesForSessions(onsetNum, perc);
     save(nameFile,'idxTrain',"idxTest","idxVal","onsetNum")  
 end
+
+onsetNum(onsetNum>=1 & onsetNum<=2) = 1;
+onsetNum(onsetNum>=3 & onsetNum<=8) = 2;
+onsetNum(onsetNum>=9 & onsetNum<=11) = 3;
 
 disp('creating the input matrix')
 

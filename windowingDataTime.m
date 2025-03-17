@@ -1,12 +1,13 @@
 close all; clearvars; clc;
 
-for subject = [7 11 15 19 23]
+spath = '/home/palatella/workspace/palatella_datasets/preprocessed/';
+dpath=  '/home/palatella/workspace/palatella_datasets/window_time/';
+% for subject = [7 11 15 19 23]
+for subject = [4]
 
-    filename = ['subj',num2str(subject),'_pruned.mat'];
+    filename = [spath,'subj',num2str(subject),'_pruned.mat'];
     load(filename)
-    
-    savingPath='/home/palatella/workspace/palatella_datasets';
-    
+
     %%
     h_EMG = hilbert(subj.emg.data');
     h_EMG = abs(h_EMG');
@@ -20,12 +21,11 @@ for subject = [7 11 15 19 23]
     %% Settings
     settings.secCue = 3;
     settings.secPostMovement = 2;
-    settings.secPreMovement = 0;
-    
+    settings.secPreMovement = 0;    
     
     %% Labels the windows for train
     disp('Labeling the windows')
-    
+   
     fs = settings.eeg.fs;
     
     nPointCue = settings.secCue*fs;
@@ -56,10 +56,12 @@ for subject = [7 11 15 19 23]
     subjLabeled.data = data;
     subjLabeled.triggers = triggers;
     subjLabeled.settings = settings;
+    
     %% SAVING
-    disp('saving')
-    savingName = [savingPath,'subj',num2str(subject),'_labeled_corrected.mat'];
+    
+    savingName = [dpath,'subj',num2str(subject),'_labeled_time.mat'];
     save(savingName,'subjLabeled','-v7.3')
+    disp(['Saved at ',savingName])
 
 end
 

@@ -50,12 +50,12 @@ for i = 1:nTrial
 end
 
 
-[results.eeg.cm, results.eeg.accuracy, results.eeg.f1, results.eeg.precision, results.eeg.sensitivity] = extract_net_performances(eegClass, output);
-[results.emg.cm, results.emg.accuracy, results.emg.f1, results.emg.precision, results.emg.sensitivity] = extract_net_performances(emgClass, output);
+[results.eeg.cm, results.eeg.accuracy, results.eeg.f1, results.eeg.precision, results.eeg.sensitivity, results.eeg.loss] = extract_net_performances(eegClass, output);
+[results.emg.cm, results.emg.accuracy, results.emg.f1, results.emg.precision, results.emg.sensitivity, results.emg.loss] = extract_net_performances(emgClass, output);
 
-[results.naive.cm, results.naive.accuracy, results.naive.f1, results.naive.precision, results.naive.sensitivity] = extract_net_performances(results.naive.class, output);
-[results.bayesian.cm, results.bayesian.accuracy, results.bayesian.f1, results.bayesian.precision, results.bayesian.sensitivity] = extract_net_performances(results.bayesian.class, output);
-[results.fuzzy.cm, results.fuzzy.accuracy, results.fuzzy.f1, results.fuzzy.precision, results.fuzzy.sensitivity] = extract_net_performances(results.fuzzy.class, output);
+[results.naive.cm, results.naive.accuracy, results.naive.f1, results.naive.precision, results.naive.sensitivity, results.naive.loss] = extract_net_performances(results.naive.class, output);
+[results.bayesian.cm, results.bayesian.accuracy, results.bayesian.f1, results.bayesian.precision, results.bayesian.sensitivity, results.bayesian.loss] = extract_net_performances(results.bayesian.class, output);
+[results.fuzzy.cm, results.fuzzy.accuracy, results.fuzzy.f1, results.fuzzy.precision, results.fuzzy.sensitivity, results.fuzzy.loss] = extract_net_performances(results.fuzzy.class, output);
 
 
 

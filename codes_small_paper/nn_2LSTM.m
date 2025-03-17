@@ -16,8 +16,15 @@ function [net, info] = nn_2LSTM(subject, train,val,test,settings,savingPath,isMa
     test.input = test.emg;
     settings.inputSize = size(train.input{1});
 
+    classes = categorical(unique(train.output));
+    classWeights = nan(settings.numClasses,1);
+    for i=1:settings.numClasses     
+        classFrequency = sum(train.output == classes(i));
+        classWeights(i) = numel(train.input)/(settings.numClasses*classFrequency);
+    end 
 
-    [net, info, probPredValidation] = LSTM2(settings, train.input, train.output, val.input, val.output);
+
+    [net, info, probPredValidation] = LSTM2(settings, train.input, train.output, val.input, val.output, classWeights, classes);
 
     trueValOutput = val.output;
     trueTestOutput = test.output;
@@ -65,9 +72,6 @@ function [net, info] = nn_2LSTM(subject, train,val,test,settings,savingPath,isMa
             
             probPredValidation = predict(net, val.input);
 
-            %[confMatrix, class, pred] = trial_predict(net, test.input, test.output, settings);
-            %accuracyThresholds = thresholdAccuracy(pred.cumul, test.output, settings);
-
             trueValOutput = val.output;
             trueTestOutput = test.output;
             savingName = [savingPathFat,startingName,'subj',num2str(subject),'_smaller_attenuation',num2str(fix(att*100))];
@@ -80,7 +84,7 @@ function [net, info] = nn_2LSTM(subject, train,val,test,settings,savingPath,isMa
 end
 
 
-function [net, info, probPredValidation] = LSTM2(settings, inputTrain, outputTrain, inputVal, outputVal)
+function [net, info, probPredValidation] = LSTM2(settings, inputTrain, outputTrain, inputVal, outputVal, classWeights, classes)
  
    dropOut = 0.1;
    hiddenUnitsLSTM = [250 100];
@@ -94,7 +98,7 @@ function [net, info, probPredValidation] = LSTM2(settings, inputTrain, outputTra
         dropoutLayer(dropOut,'Name','LSTM2_Drop')
         fullyConnectedLayer(settings.numClasses,'Name','fc')
         softmaxLayer('Name','soft')
-        classificationLayer('Name','classification')]);
+        classificationLayer('Name','classification', Classes=classes, ClassWeights=classWeights)]);
 
 
     miniBatchSize = 512;
@@ -110,20 +114,13 @@ function [net, info, probPredValidation] = LSTM2(settings, inputTrain, outputTra
         'ValidationFrequency',validationFrequency, ...
         'Verbose',false, ...
         'ExecutionEnvironment','gpu', ...
-        'ValidationData',{inputVal,outputVal});%, ...
-       % 'ValidationPatience', 3,...
-       % 'OutputNetwork','best-validation-loss');
-        %'Plots','training-progress');
+        'ValidationData',{inputVal,outputVal});
+      
     
     % Training
     [net, info] = trainNetwork(inputTrain, outputTrain, lgraph, options);
 
     probPredValidation = predict(net, inputVal);
-    
-    % Prediction and confusion matrix
-    %[confMatrix, class, pred] = trial_predict(net, inputVal, outputVal, settings);
-    %accuracyThresholds = nan;
-    %accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings);
 
 end
 

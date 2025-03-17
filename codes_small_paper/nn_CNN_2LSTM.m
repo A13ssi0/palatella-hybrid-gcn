@@ -12,8 +12,14 @@ function [net, info] = nn_CNN_2LSTM(subject, train,val,test,settings,savingPath,
     test.input = test.eeg;
     settings.inputSize = size(train.input{1},1:3);
 
+    classes = categorical(unique(train.output));
+    classWeights = nan(settings.numClasses,1);
+    for i=1:settings.numClasses     
+        classFrequency = sum(train.output == classes(i));
+        classWeights(i) = numel(train.input)/(settings.numClasses*classFrequency);
+    end
 
-    [net, info, probPredValidation] = CNN_2LSTM(settings, train.input, train.output, val.input, val.output);
+    [net, info, probPredValidation] = CNN_2LSTM(settings, train.input, train.output, val.input, val.output, classWeights, classes);
 
     trueValOutput = val.output;
     trueTestOutput = test.output;
@@ -25,7 +31,7 @@ function [net, info] = nn_CNN_2LSTM(subject, train,val,test,settings,savingPath,
 end
 
 
-function [net, info, probPredValidation] = CNN_2LSTM(settings, inputTrain, outputTrain, inputVal, outputVal)
+function [net, info, probPredValidation] = CNN_2LSTM(settings, inputTrain, outputTrain, inputVal, outputVal, classWeights, classes)
 
    filterSize = 3;
    numFilters = 32; 
@@ -47,7 +53,7 @@ function [net, info, probPredValidation] = CNN_2LSTM(settings, inputTrain, outpu
         dropoutLayer(dropOut,'Name','LSTM2_Drop')
         fullyConnectedLayer(settings.numClasses,'Name','fc')
         softmaxLayer('Name','soft')
-        classificationLayer('Name','classification')]);
+        classificationLayer('Name','classification', Classes=classes, ClassWeights=classWeights)]);
 
 
     lgraph = connectLayers(lgraph,'foldCNN/miniBatchSize','unfoldCNN/miniBatchSize');
@@ -66,20 +72,11 @@ function [net, info, probPredValidation] = CNN_2LSTM(settings, inputTrain, outpu
         'ValidationFrequency',validationFrequency, ...
         'Verbose',false, ...
         'ExecutionEnvironment','gpu', ...
-        'ValidationData',{inputVal,outputVal});%, ...
-       % 'ValidationPatience', 3,...
-       % 'OutputNetwork','best-validation-loss');
-        %'Plots','training-progress');
+        'ValidationData',{inputVal,outputVal});
     
     % Training
     [net, info] = trainNetwork(inputTrain, outputTrain, lgraph, options);
     
     probPredValidation = predict(net, inputVal);
-
-    % Prediction and confusion matrix
-    %[confMatrix, class, pred] = trial_predict(net, inputVal, outputVal, settings);
-    %accuracyThresholds = nan;
-    %accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings);
-
 end
 

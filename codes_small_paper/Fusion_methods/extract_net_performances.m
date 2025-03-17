@@ -1,4 +1,4 @@
-function [confMatrix,accuracy,f1score,precision,sensitivity] = extract_net_performances(prediction,trueValues)
+function [confMatrix,accuracy,f1score,precision,sensitivity, loss] = extract_net_performances(prediction,trueValues)
 %   prediction = N x classes  or  prediction = N x 1 (==classes)
 
 trueValues = double(trueValues);
@@ -15,6 +15,10 @@ accuracy = sum(class==trueValues)/length(trueValues);
 sensitivity = diag(confMatrix)./sum(confMatrix,2);
 precision = diag(confMatrix)./sum(confMatrix,1)';
 f1score = 2*precision.*sensitivity./(precision+sensitivity);
+
+model.class.classes = class;
+model.trueTestOutput = trueValues;
+loss = computeLossFromModel(model);
 
 sensitivity = mean(sensitivity);
 precision = mean(precision);

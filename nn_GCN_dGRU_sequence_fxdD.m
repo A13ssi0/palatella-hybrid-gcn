@@ -75,9 +75,9 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_seq
         'LearnRateDropPeriod',2, ...
         'Shuffle', 'once', ...
         'ValidationFrequency',validationFrequency, ...
-        'Verbose',false, ...
-        'ExecutionEnvironment','gpu');%,...
-    %        'ValidationData',{inputVal,outputVal}, ...
+        'Verbose',true, ...
+        'ExecutionEnvironment','gpu',...
+        'ValidationData',{inputVal,outputVal});
         %'Plots','training-progress');
     
     % Training
@@ -85,14 +85,14 @@ function [net, info, confMatrix, class, pred, accuracyThresholds] = GCN_dGRU_seq
     
     % Prediction and confusion matrix
     if isTime
-         [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings, [], [], settings.movwinLength);
-         accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings, [], [], settings.movwinLength);
+         [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings, [], [], settings.movWinLength);
+         accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings, [], [], settings.movWinLength);
     else
         [confMatrix, class, pred] = trial_predict(net, inputTest, outputTest, settings);
         accuracyThresholds = thresholdAccuracy(pred.cumul, outputTest, settings);
     end
 end
 
-function featureMap = slicing(matrix, startingPoint, heigth)
-    featureMap = dlarray(matrix(startingPoint:startingPoint+heigth-1,:,:,:,:,:));
+function featureMap = slicing(matrix, startingPoint, height)
+    featureMap = dlarray(matrix(startingPoint:startingPoint+height-1,:,:,:,:,:));
 end

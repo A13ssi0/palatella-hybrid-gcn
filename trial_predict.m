@@ -12,7 +12,9 @@ end
 
 %nWindowsTrial = settings.nWindowsTrial;
 if exist('windowSeconds','var')
-    nWindowsTrial = windowSeconds/settings.windowShift;
+    nWindowsTrial = windowSeconds/settings.movWinShift;
+
+    % nWindowsTrial = windowSeconds/settings.windowShift;
 else
     nWindowsTrial = (settings.secPostMovement+settings.secPreMovement)/0.04; %settings.mowwinShift
 end
